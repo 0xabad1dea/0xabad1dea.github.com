@@ -1,0 +1,680 @@
+// "A Bad Idea presents:"
+|| _    _ _______ _     _ _     _ _______ _     _
+||  \  /  |_____|  \___/  |_____| |_____|  \___/ 
+||   \/   |     | _/   \_ |     | |     | _/   \_
+||
+\\ "VaxHax: A Quick Guide to Asm on the VAX-11"
+					Version 0.2 : December 18th, 2007
+	ToC				Version 0.1 : November  6th, 2007
+-------------------------------------------------------------------------->
+1. Disclaimer (Read it, seriously)
+2. Background on the DEC VAX-11
+3. Running Your Program
+4. Programming Conventions
+5. Sample Program
+6. Opcode Tables
+7. System Functions
+-------------------------------------------------------------------------->
+1. Disclaimer (Read it, seriously)
+-------------------------------------------------------------------------->
+Unlike x86, documentation on the Vax and OpenVMS is surprisingly hard to
+find. Everything here is based on a lot of guesswork and some docs that
+are older than I am. There might be some mistakes in here, and there are
+some details that I simply do not know. However, the sample program does
+run, for what it's worth! :)
+
+You can look for the latest version at 0xabad1dea.net.
+
+Also, this article is not for the inexperienced. You have been warned.
+-------------------------------------------------------------------------->
+2.Background on the DEC VAX-11
+-------------------------------------------------------------------------->
+The Vax is a 32-bit machine generally used as a mainframe. The very first
+one was made in 1977 and the very last in 2005. The "native" operating
+system is OpenVMS, and that is what we are dealing with in this article.
+Vaxen exist throughout the world in critical infrastructure; my university
+has been running on a couple of them since 1983! 
+
+Please note that OpenVMS also runs on Alpha machines, which are an
+entirely different architecture than described here.
+
+VMS is nothing like Unix. (It's too danged wordy, for one thing.) You
+absolutely must become familiar with its command-line environment before
+proceeding. Here is some documentation:
+
+http://www.snee.com/bob/opsys.html
+An out-of-print book now available as a free PDF. This should tell you
+everything you need to deal with the command-line.
+
+http://www.textfiles.com/hacking/VMS/
+All the old stuff from BBSs of the 80s. Apparently, guessing a default
+password used to count as hacking. ;)
+
+If you, like most sane people, do not own a Vax, you can get a shell
+account for free at http://deathrow.vistech.net and log into host
+"manson". Please be very respectful of the service they are providing!
+
+I would like to make one note that may be tremendously helpful: on some
+vaxen, the editor is named "edit", and on others, "eve".
+-------------------------------------------------------------------------->
+3. Running Your Program
+-------------------------------------------------------------------------->
+Before I show you any source code, let's make sure you know how to use 
+the assembler, linker, and debugger from the command line.
+
+The assembler in OpenVMS is named "macro" which can be shortened to "mac". 
+I can only assume this is because the designers were macro-happy to a 
+fault. The file extension for an asm program is ".mar" by convention. (I 
+really have no idea why. Sorry.) It needs to be linked explicitly with the 
+"link" command, and non-installed binaries are run by passing them as an 
+argument to "run". In other words, if you have a source file "myprog.mar":
+
+$ mac myprog
+$ link myprog
+$ run myprog
+	[ output here...]
+
+To produce a listing "myprog.lis":
+
+$ mac/lis myprog
+
+If you want to use the debugger, you must explicitly set this up with the
+"/debug" qualifier in both mac and link. Running your program will then
+automatically start it in the debugger. 
+
+$ mac/debug myprog
+$ link/debug myprog
+$ run myprog
+	[debugger takes over the screen]
+
+I'm not very familiar with the debugger. Here's some basics:
+	go	starts the program
+	step	steps, just like you expect
+	e	examine a register or address
+	deposit set a var, eg "r6 = 5"
+	set	does many things, see its help menu
+	exit	does what you think it does
+	help	help. ctrl-z is the only way I know of to back out of
+		a level of the menu. There might be a "correct" way.
+
+Once you're done debugging, rerun mac and link without the /debug
+qualifier to get an ordinary binary.
+-------------------------------------------------------------------------->
+4. Programming Conventions
+-------------------------------------------------------------------------->
+Here are all the random facts you need to know:
+(This is not organized at all. I'm sorry.)
+
+The machine is 32-bit, little endian. Stacks grow down.
+
+There are 16 registers, r0 through r15. Only r6 through r11 are safe 
+for any purpose. They are all 4 bytes long.
+	r0-r5 are altered by some instructions.
+	r6-r11 are never altered for you. Use these.
+	r12 is the "argument pointer" for subroutine calls.
+	r13 is the "frame pointer", points to current stack base.
+	r14 is the "stack pointer", points to the top thereof.	
+	r15 is the "program counter", points to next instruction.
+		Ostensibly read-only.
+
+	The assembler expects you to refer to r14 as "sp" and r15 as 
+	"pc". It gets very upset if you don't.
+
+	r1 works like Intel's EAX, in that if you expect something to
+	return a value, but it's not obvious where, it's probably
+	in r1.
+	
+
+Comments start with a semicolon. No surprise there.
+
+The assembler is completely case-insensitive.
+
+Hexadecimal numbers are prefixed with ^X. (Not 0x or h.) ^B is binary,
+^F is float, and ^D is the default decimal. There is also ^M for Mask-
+#^M<r7,r1> creates a mask with bits 1 and 7 set. There is even ^A for
+ascii, ie ^A' ' generates 0x20.
+
+Immediate operands are prefixed with #. This is very important!
+
+Operations on memory generally end with "l", "w" or "b" to indicate
+long, word or byte respectively.
+
+Mathematical operations have a 2-operand form "src,dst" and a 3-operand
+form "src1,src2,dst". 
+
+The valid types for declaring variables are:
+	.byte, .word, .long, .quad - 1,2,4,8 bytes
+	.float		4 bytes, 7 significant digits
+	.double		8 bytes, 16 significant digits
+	.g_float	8 bytes, 15 significant digits
+	.h_float	16 bytes, 33 significant digits
+	.blkb/w/l/q	Define a block, eg .blkl 128
+	.address	holds a pointer. eg ".address MyLabel"
+	.ascii		Literal string
+	.asciz		C-String (null is appended)
+	.ascic		Pascal String (length is prepended)
+	.ascid		VMS String. 8-byte descriptor prepended. You
+			MUST use this with VMS calls.
+
+Some other assembler directives are:
+	.library "name"		Include a library
+	.macro Name,Arg,Arg	Starts a macro
+	.endm			Ends a macro
+	.entry Name,Mask	Start a function
+	.end Name		End a function
+
+
+Special Note on Ascii Values:
+	Instinctively, you will place "" or '' around strings. This is
+	fine, given that you place no quotes in the string itself.
+	However, you may use ANY character as the start/end delimiter
+	so long as it is not used in the string itself. ie,
+
+	.ascid 'a string' 
+		and
+	.ascid /a string/
+
+	are the same thing. Confusing, but whatever.
+
+
+Floating Point Format ( .float):	
+
+	Bits  0- 7: 	High Mantissa With Hidden Bit * 
+	Bits  8-14:	Exponent with bias of 128 **
+	Bit     15:	Sign Bit
+	Bits 16-31:	Low Mantissa
+
+	* Since the high mantissa always starts with a 1-bit, it is
+	"implied" and not stored. ie, 1100 becomes 100. 
+
+	** For mathematical reasons, 128 is added to the exp.
+	when stored. Subtract 128 to get the real answer.	
+
+Indirect Addressing and Such
+
+	This part is complicated and difficult to understand. 
+	Parentheses () are equivalent to brackets [] from intel syntax:
+	they use the contents as a pointer and get /that/.
+	
+	Decrement and increment alter the source by 4 - after reading(?)	
+
+	Name		Example		Mode Bits
+
+	Literal Short:	#16		0,1,2,3 *	
+	Index:		MyLabel[r7]	4		
+	Register:	r7		5		
+	Deferred:	(r7)		6		
+	Decrement:	-(r7)		7
+	Increment:	+(r7)		8
+	Inc.Deferred:	@(r7)+		9
+	Displacement:	4(r7)		A
+	Disp.Deferred:	@4(r7)		B
+	2-byte Disp.	400(r7)		C
+	2-byte Disp.Def	@400(r7)	D
+	4-byte Disp.	4000000(r7)	E
+	4-byte Disp.Def	@4000000(r7)	F	
+	
+	* Add this to next four bits to get the whole immediate. Literals
+	that are longer than that get a full four bytes.
+	For other modes, the next four bits specifies the register # or
+	somesuch. 
+
+About Popping
+	There is no normal pop. Only Pop Registers. You can type "popl"
+	in the assembler but it will replace it with 
+		movl	(sp)+,operand
+	So just be aware of that if you're disassembling.
+	Pushing and popping registers uses a mask. ^M<r5,r6,r2> would
+	pop into only those three registers. ^xFFFF returns all of them. 
+
+	(Note that ^M is intelligent: I specified the registers out of
+	order, but we'll still get a correct mask.)
+
+Processor Status Word
+	In other words, the flags register... it has some set/clear
+	and move commands all to itself (grep "psw" and "psl")
+
+	0: C  (Carry)
+	1: V  (Overflow)
+	2: Z  (Zero)
+	3: N  (Negative)
+	4: T  (Trace - for debugging I guess?)
+	5: IV (Integer Overflow Trap)
+	6: FU (Floating Underflow trap, hahaha)
+	7: DV (Decimal Overflow trap)
+	8-15: "MBZ"? I have no clue.
+	17-31: Privileged. Labeled 16-20:IPL,21:MBZ,22-23:PRVMOD,
+		24-25:CURMOD,26:IS,27:FPD,28-29:MBZ,30:TP,31:CM
+
+	If I knew what the high-order bits did, I'd tell you...
+
+
+
+Programs take the general form:
+
+	; Generic VAX Program
+
+	MyVar:	.long	^Xabad1dea	; a label and a variable
+	.Entry MyProg,0			; start of program
+		[code... ]
+		$exit_s
+	.End MyProg			; finish program
+
+
+-------------------------------------------------------------------------->
+5. Sample Program
+-------------------------------------------------------------------------->
+; Oh Vax, how do I hate thee? Let me enumerate the ways.
+; a simplified 99 Bottles song by Abadidea
+
+Count:	.long	99			; here is our counter...
+StrCnt:	.ascid	/  /			; two spaces reserved for count
+String:	.ascid	'99 bottles of Orangina on the wall'
+
+.Entry Bottles,0			; marks startpoint
+loop:					; a label. 
+	pushal	String			; pushing addr. of argument
+	calls	#1,g^lib$put_output     ; printing function
+	decl	Count 			; decrementing counter...
+	pushal	StrCnt			; arg2 for long to ascii
+	pushal	Count			; arg1 for the same
+	calls	#2,g^ots$cvt_l_ti	; long-to-ascii function
+	movw	StrCnt+8,String+8	; move count into the string
+	cmpl	Count,#0		; compare long
+	bgtr	loop			; branch-if-greater
+	$exit_s				; exit function
+.End Bottles				; fin	
+; written with a bottle of Orangina in hand
+-------------------------------------------------------------------------->
+6. Opcode Tables
+-------------------------------------------------------------------------->
+
+This is the part where you realize why CISC is bad, at least if you have
+to type out a table for it by hand. Still, Vax-11 has nothing on x86...!
+
+I'm pretty sure this contains ALL OF THEM. Seriously. Ever.
+
+Name	Code	Desc
+-------------------------------------------------------------------------->
+
+acbb	9D	Add, compare, and branch byte
+acbd	6F	Add, compare, and branch double
+acbf	4F	Add, compare, and branch float
+acbg	4FFD	Add, compare, and branch g-float
+acbh	6FFD	Add, compare, and branch h-float
+acbl	F1	Add, compare, and branch long
+acbw	3D	Add, compare, and branch word
+adawi	58	Add aligned word interlocked
+addb2	80	Add byte, two operands 
+addb3	81	Add byte, three operands
+addd2	60	Add double, two operands
+addd3	61	Add double, three operands
+addf2	40	Add float, two operands
+addf3	41	Add float, three operands 
+addg2	40FD	Add g-float, two operands
+addg3	41FD	Add g-float, three operands
+addh2	60FD	Add h-float, two operands
+addh3	61FD	Add h-float, three operands
+addl2	C0	Add long, two operands
+addl3	C1	Add long, three operands
+addp4	20	Add packed, four operands
+addp6	21	Add packed, six operands
+addw2   A0	Add word, two operands
+addw3	A1	Add word, three operands
+adwc	D6	Add with carry
+aobleq	F3	Add one, branch less than or equal
+aoblss	F2	Add one, branch on less
+ashl	78	Arithmetic shift long	*
+ashp	F8	Arithmetic shift packed
+ashq	79	Arithmetic shift quadword
+bbc	E1	Branch on bit clear
+bbcc	E5	Branch on bit clear and then clear
+bbcci	E7	Branch on bit clear and clear interlocked
+bbcs	E3	Branch on bit clear and then set
+bbs	E0	Branch on bit set
+bbsc	E4	Branch on bit set and then clear
+bbss	E2	Branch on bit set and then set
+bbssi	E6	Branch on bit set and set interlocked
+bcc	1E	Branch on carry clear
+bcs	1F	Branch on carry set
+beql	13	Branch on equal
+beqlu	13	Branch on equal unsigned	**beql
+bgeq	18	Branch on greater-than or equal
+bgequ	1E	Branch on greater-than or equal unsigned	**bcc
+bgtr	14	Branch on greater-than
+bgtru	1A	Branch on greater-than unsigned
+bicb2	8A	Bit clear byte, two operands
+bicb3	8B	Bit clear byte, three operands
+bicl2	CA	Bit clear long, two operands
+bicl3	CB	Bit clear long, three operands
+bicpsw	B9	Bit clear PSW (processor status word)
+bicw2	AA	Bit clear word, two operands
+bicw3	AB	Bit clear word, three operands
+bisb2	88	Bit set byte, two operands
+bisb3	89	Bit set byte, three operands
+bisl2	C8	Bit set byte, two operands
+bisl3	C9	Bit set byte, three operands
+bispsw	B8	Bit set PSW (processor status word)
+bisw2	A8	Bit set word, two operands
+bisw3	A9	Bit set word, three operands
+bitb	93	Bit test byte
+bitl	D3	Bit test long
+bitw	B3	Bit test word
+blbc	E9	Branch on low bit clear
+blbs	E8	Branch on low bit set
+bleq	15	Branch on less-than or equal
+blequ	1B	Branch on less-than or equal unsigned
+blss	19	Brand on less-than	
+blssu	1F	Brancg on less-than unsigned	**bcs
+bneq	12	Branch on not equal
+bnequ	13	Branch on not equal unsigned	**beql?!
+bpt	03	Breakpoint trap
+brb	11	Branch with byte displacement	
+brw	31	Branch with word displacement
+bsbb	10	Branch to subroutine with byte displacement
+bsbw	30	Branch to subroutine, word displacement
+bugl	FDFF	Debug long
+bugw	FEFF	Debug word
+bvc	1C	Branch on overflow clear
+bvs	1D	Branch on overflow set
+callg	FA	Call with general argument list
+calls	FB	Call with stack
+caseb	8F	Case byte
+casel	CF	Case long
+casew	AF	Case word
+chme	BD	Change mode to executive
+chmk	BC	Change mode to kernel
+chms	BE	Change mode to supervisor
+chmu	BF	Change mode to user
+clrb	94	Clear byte
+clrd	7C	Clear double
+clrf	D4	Clear float
+clrg	7C	Clear g-float	**clrd
+clrh	7CFD	Clear h-float
+clrl	D4	Clear long	**clrf
+clro	7CFD	Clear octaword	**clrh
+clrq	7C	Clear quadword	**clrd
+clrw	B4	Clear word
+cmpb	91	Compare byte
+cmpc3	29	Compare character, three operands
+cmpc5	2D	Compare character, five operands
+cmpd	71	Compare double
+cmpf	51	Compare float
+cmpg	51FD	Compare g-float
+cmph	71FD	Compare h-float
+cmpl	D1	Compare long
+cmpp3	35	Compare packed, three operands
+cmpp4	37	Compare packed, four operands
+cmpv	EC	Compare field
+cmpw	B1	Compare word
+cmpzw	ED	Compare zero-extended word
+crc	0B	Calculate cyclic redundancy check	***
+cvtbd	6C	Convert byte to double
+cvtbf	4C	Convert byte to float
+cvtbg	4CFD	Convert byte to g-float
+cvtbh	6CFD	Convert byte to h-float
+cvtbl	98	Convert byte to long
+cvtbw	99	Convert byte to word
+cvtfb	48	Convert float to byte
+cvtfd	56	Convert float to double
+cvtfg	99FD	Convert float to g-float
+cvtfh	98FD	Convert float to h-float
+cvtfl	4A	Convert float to long
+cvtfw	49	Convert float to word
+cvtgb	48FD	Convert g-float to byte
+cvtgf	33FD	Convert g-float to float
+cvtgh	56FD	Convert g-float to h-float
+cvtgl	4AFD	Convert g-float to long
+cvtgw	49FD	Convert g-float to word
+cvthb	68FD	Convert h-float to byte
+cvthd	F7FD	Convert h-float to double
+cvthf	F6FD	Convert h-float to float
+cvthg	76FD	Convert h-float to g-float
+cvthl	6AFD	Convert h-float to long
+cvthw	69FD	Convert h-float to word
+cvtlb	F6	Convert long to byte
+cvtld	6E	Convert long to double
+cvtlf	4E	Convert long to float
+cvtlg	4EFD	Convert long to g-float
+cvtlh	6EFD	Convert long to h-float
+cvtlp	F9	Convert long to packed
+cvtlw	F7	Convert long to word
+cvtpl	36	Convert packed to long
+cvtps	08	Convert packed to leading seperate
+cvtpt	24	Convert packed to trailing
+cvtrdl	6B	Convert rounded double to long
+cvtrfl	4B	Convert rounded float to long
+cvtrgl	4BFD	Convert rounded g-float to long
+cvtrhl	6BFD	Convert rounded h-float to long
+cvtsp	09	Convert leading separate to packed
+cvttp	26	Convert trailing to packed
+cvtwb	33	Convert word to byte
+cvtwd	6D	Convert word to double
+cvtwf	4D	Convert word to float
+cvtwg	4DFD	Convert word to g-float
+cvtwh	6DFD	Convert word to h-float
+cvtwl	32	Convert word to long
+decb	97	Decrement byte
+decl	D7	Decrement long
+decw	B7	Decrement word
+divb2	86	Divide byte, two operands
+divb3	87	Divide byte, three operands
+divd2	66	Divide double, two operands
+divd3	67	Divide double, three operands
+divf2	46	Divide float, two operands
+divf3	47	Divide float, three operands
+divg2	46FD	Divide g-float, two operands
+divg3	47FD	Divide g-float, three operands
+divh2	66FD	Divide h-float, two operands
+divh3	67FD	Divide h-float, three operands
+divl2	C6	Divide long, two operands
+divl3	C7	Divide long, three operands
+divp	27	Divide packed
+divw2	A6	Divide word, two operands
+divw3	A7	Divide word, three operands
+editpc	38	Edit packed to character
+ediv	7B	Extended divide
+emodd	74	Extended modulus double
+emodf	54	Extended modulus float
+emodg	54FD	Extended modulus g-float
+emodh	74FD	Extended modulus h-float
+emul	7A	Extended multiply
+extv	EE	Extract field
+extzv	EF	Extract zero-extended field
+ffc	EB	Find first clear bit
+ffs	EA	Find first set bit
+halt	00	Halt
+incb	96	Increment byte
+incl	D6	Increment long
+incw	B6	Increment word
+index	0A	Index calculation
+insqhi	5C	Insert into queue at head, interlocked
+insqti	5D	Insert into queue at tail, interlocked
+insque	0E	Insert into queue
+insv	F0	Insert field
+jmp	17	Jump
+jsb	16	Jump to subroutine
+ldpctx	06	Load program context
+locc	3A	Locate character
+matchc	39	Match character
+mcomb	92	Move complemented byte
+mcoml	D2	Move complemented longword
+mcomw	B2	Move complemented word
+mfpr	DB	Move from processor register
+mnegb	8E	Move negated byte
+mnegd	72	Move negated double
+mnegf	52	Move negated float
+mnegg	52FD	Move negated g-float
+mnegh	72FD	Move negated h-float
+mnegl	CE	Move negated long
+mnegw	AE	Move negated word
+movab	9E	Move address byte
+movad	7E	Move address double
+movaf	DE	Move address float
+movag	7E	Move address g-float	**movad
+movah	7EFD	Move address h-float
+moval	DE	Move address long	**movaf
+movao	7EFD	Move address octaword	**movah
+movaq	7E	Move address quadword	**movad
+movaw	3E	Move address word
+movb	90	Move byte
+movc3	28	Move character, three operands
+movc5	2C	Move character, five operands
+movd	70	Move double
+movf	50	Move float
+movg	50FD	Move g-float
+movh	70FD	Move h-float
+movl	D0	Move long
+movo	7DFD	Move octaword	(inconsistent?)
+movp	34	Move packed
+movpsl	DC	Move PSL (Processor Status Longword)
+movq	7D	Move quadword
+movtc	2E	Move translated characters
+movtuc	2F	Move translated until character
+movw	B0	Move word
+movzbl	9A	Move zero-extended byte to long
+movzbw	9B	Move zero-extended byte to word
+movzwl	3C	Move zero-extended word to long
+mtpr	DA	Move to processor register
+mulb2	84	Multiply byte, two operands
+mulb3	85	Multiply byte, three operands
+muld2	64	Multiply double, two operands
+muld3	65	Multiple double, three operands
+mulf2	44	Multiply float, two operands
+mulf3	45	Multiply float, three operands
+mulg2	44FD	Multiple g-float, two operands
+mulg3	45FD	Multiply g-float, three operands
+mulh2	64FD	Multiply h-float, two operands
+mulh3	65FD	Multiply h-float, three operands
+mull2	C4	Multiply long, two operands
+mull3	C5	Multiply long, three operands
+mulp	25	Multiply packed
+mulw2	A4	Multiply word, two operands
+mulw3	A5	Multiply word, three operands
+nop	01	No operation
+polyd	75	Evaluate polynomial double
+polyf	55	Evaluate polynomial float
+polyg	55FD	Evaluate polynomial g-float
+polyh	75FD	Evaluate polynomial h-float
+popr	BA	Pop registers
+prober	0C	Probe read access
+probew	0D	Probe write access
+pushab	9F	Push address of byte
+pushad	7F	Push address of double
+pushaf	DF	Push address of float
+pushag	7F	Push address of g-float	**pushad
+pushah	7FFD	Push address of h-float
+pushal	DF	Push address of long	**pushaf
+pushao	7FFD	Push address of octaword	**pushah
+pushaq	7F	Push address of quadword	**pushad
+pushaw	3F	Push address of word
+pushl	DD	Push long
+pushr	BB	Push registers
+rei	02	Return from interrupt
+remqhi	5E	Remove from queue at head, interlocked
+remqti	5F	Remove from queue at tail, interlocked
+remque	0F	Remove from queue
+ret	04	Return from procedure
+rotl	9C	Rotate long	*
+rsb	05	Return from subroutine
+sbwc	D9	Subtract with carry
+scanc	2A	Scan for character
+skpc	3B	Skip character
+sobgeq	F4	Subtract one, branch on greater-than or equal
+sobgtr	F5	Subtract one, branch on greater-than
+spanc	2B	Span characters
+subb2	82	Subtract byte, two operands
+subb3	83	Subtract byte, three operands
+subd2	62	Subtract double, two operands
+subd3	63	Subtract double, three operands
+subf2	42	Subtract float, two operands
+subf3	43	Subtract float, three operands
+subg2	42FD	Subtract g-float, two operands
+subg3	43FD	Subtract g-float, three operands
+subh2	62FD	Subtract h-float, two operands
+subh3	63FD	Subtract h-float, three operands
+subl2	C2	Subtract long, two operands
+subl3	C3	Subtract long, three operands
+subp4	22	Subtract packed, four operands
+subp6	23	Subtract packed, six operands
+subw2	A2	Subtract word, two operands
+subw3	A3	Subtract word, three operands
+svpctx	07	Save processor context
+tstb	95	Test byte
+tstd	73	Test double
+tstf	53	Test float
+tstg	53FD	Test g-float
+tsth	73FD	Test h-float
+tstl	D5	Test long
+tstw	B5	Test word
+xfc	FC	Extended function call
+xorb2	8C	xor byte, two operands
+xorb3	8D	xor byte, three operands
+xorl2	CC	xor long, two operands
+xorl3	CD	xor long, three operands
+xorw2	AC	xor word, two operands
+xorw3	AD	xor word, three operands
+
+*	Use negative immediates to shift/rotate to the left. I'm noting
+	this because it took me forever to figure that out.
+
+**	Yes, they're the same.
+
+***	?!?! Are you serious?! Now I get the old "If VAX ran gcc, it'd
+	be an opcode" joke.
+
+Invalid(?) Opcodes: 57,59,5A,5B,77
+-------------------------------------------------------------------------->
+7. System Functions
+-------------------------------------------------------------------------->
+
+Now THIS part is odd. Why does it come last? Mostly because it took me 
+forever to figure it out...
+
+There are two different call opcodes, calls (stack) and callg (general). 
+callg works by loading r12 with the pointer to the array of arguments; 
+by convention, the first one contains the number of args (not counting 
+itself). You use this for roll-your-own functions and you can probably 
+figure it out. More interesting are the system functions. 
+
+As far as I can tell, most if not all of the system functions are
+documented under the system "help" command, under sections labeled
+"Routines." Therefore the hard part is figuring out how to call them, and
+frankly, I think it looks really weird. 
+
+This is basically just a repeat of part of the sample program, but here 
+you go:
+
+	String:	.ascid	"This is a very nice string"
+
+ 	[...]
+	
+	pushal	String			; you push in the args like normal
+	calls	#1,g^lib$put_output	; and this is what a call looks like
+
+
+Now. Isn't that messy?
+
+The first thing to note is that the string type all the functions operate on
+is ".ascid". The first two bytes are the length, and you usually have to fix
+this yourself if you tamper with it. For example, if you want to convert a
+string you read in with lib$get_input to a long, you need to scan it for the
+first blank and change the string's length to reflect this before you pass
+it to ots$cvt_ti_l (convert ascii to long). (Tip: locc #32,len,String+8 will
+put the index of the first space into r1. "String+8" is to skip over the
+descriptor.)
+
+You push the arguments in backwards, like any assembler programmer would
+expect.The part that was new to me was that you have to specify the 
+number of operands as an immediate ("#1" in the above). 
+
+You will notice that the name of the functionis prefixed with "g^" - 
+this is VERY IMPORTANT. As near as I can tell, "g^" is for "global," 
+though I could be wrong. Leaving it out creates horrible errors. That 
+brings up my last piece of advice for you: the assembler's error 
+messages are just about useless. In fact, without an opcode table
+(oh hey, I know where to get one of those!) a lot of them ARE useless. So,
+thank me lots for being such a hard-working kid... and have fun! <3
+-------------------------------------------------------------------------->
+FIN -- 0xabad1dea.net -- abadidea -- FIN
+-------------------------------------------------------------------------->

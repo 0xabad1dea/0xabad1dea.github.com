@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C/DTD HTML 4.01 Transitional//EN">
+<!-- ooooh look at you, ogling my source with your sinful eyes -->
+
+<html>
+<head>
+	<title>Segfault At Address 0xabad1dea</title>
+	<meta name="keywords" content="0xabad1dea abadidea 
+ vgm chiptune 6502 2a03 retroprogramming nes nintendo static analysis security infosec compsec">
+	<meta name="description" content="A Bad Idea, the most embarrassingly pink researcher of all">
+</head>
+<!--
+	THEME HEAVY SOUND COLOR SCHEME
+
+	whiteyellow	#f8f0db
+	whitepink	#f8ebee
+	paleyellow	#f6f6de
+	palepink	#f7e1e1
+	pink		#f3c1cd
+	coral		#f1a995
+	orange		#f0be51
+	yellow		#eeeea9
+	
+	and of course...
+	Strawberry Melissa	#d56868
+-->
+
+<body>
+<style>
+/* Theme Heavy Sound */
+body { 
+background-color: #f7e1e1;
+margin-top: 10px;
+}
+
+a {
+background-color:#f8f0db;
+color:#d56868;
+text-transform:uppercase;
+letter-spacing:2px;
+/*border: #f8f0db solid 1px;*/
+text-decoration:none;
+/*-moz-border-radius: 4px;
+-webkit-border-radius:4px;*/
+}
+
+a:hover {
+border-bottom:#f1a995 dashed 1px;
+}
+
+
+p {
+background-color: #f8ebee;
+border: #f1a995 solid 1px;
+width: 600px;
+font-family: tahoma, serif;
+color: #585858;
+font-size: 10pt;
+padding:8px;
+text-align:justify;
+margin-top:10px;
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius:5px;
+line-height:160%;
+}
+
+ul {
+color: #585858;
+background-color:#f8f0db;
+width:80%;
+font-family: tahoma, serif;
+font-size: 10pt;
+padding:5px;
+position:relative;
+left:10%;
+}
+
+li:first-letter {
+color:black;
+}
+
+
+.head {
+background-color: #f6f6de;
+border: #f0be51 solid 1px;
+color:#484848;
+padding:3px;
+text-align:center;
+letter-spacing:2px;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+}
+
+p.head {
+width:570px;
+font-weight:bold;
+position:relative;
+left:15px;
+}
+
+span.head {
+line-height:200%;
+}
+
+p.nav {
+width:120px;
+border-left:none;
+border-right:none;
+border-top: #f1a995 solid 1px;
+border-bottom: #f1a995 solid 1px;
+font-size:8pt;
+text-align:right;
+margin-top:10px;
+margin-bottom:10px;
+-moz-border-radius:0px;
+-webkit-border-radius:0px;
+border-radius:0px;
+}
+
+a.nav {
+line-height:135%;
+
+}
+
+i {
+font-family:Georgia,serif;
+}
+
+.mainbar {
+width:600px;
+position:absolute;
+top:0px;
+right:25%;
+
+}
+
+
+.navbar {
+position:absolute;
+top:0px;
+right:0px;
+border-left: #f1a995 solid 1px;
+border-bottom:  #f1a995 solid 1px;
+width:130px;
+-moz-border-radius-bottomleft:5px;
+-webkit-border-bottom-left-radius:5px;
+border-bottom-left-radius:5px;
+}
+
+
+
+.fancy {
+text-transform: uppercase;
+letter-spacing:4px;
+font-family:sans;
+}
+
+
+.code {
+font-family: monospace;
+background-color: #f6f6de;
+border: #f7e1e1 dashed 2px;
+white-space:pre;
+width:600px;
+min-height:100px;
+height:200px;
+padding:4px;
+}
+
+img { 
+border:0px; 
+}
+
+.outline { 
+border: #f1a995 solid 1px; 
+margin: 3px;
+}
+
+.rounded {
+/*background-color:white;*/
+border: 1px solid #f1a995;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+}
+
+
+</style>
+
+
+
+
+<!-- content -->
+
+<!-- main column start -->
+<div class=mainbar>
+
+<div style="">
+<img src="img/tetoheader.png" style="position:relative;left:44px;">
+</div>
+<br>
+
+
+
+<p class=head> Segmentation Fault At Address 0xABAD1DEA
+</p>
+
+
+<p>
+What's so special about 2,880,249,322? Nothing really, it's just a number all my own. My name is Abadidea, but you can call me Abby or maybe (if I really like you) Melissa. I'm a Linux person, I do NES programming and chiptunes, I love Dwarf Fortress and Vocaloid, and I do not actually have pink hair. Usually.
+<br><br>
+I am a computer security researcher playing defense at <a href="http://veracode.com">Veracode,</a> home of the world's finest binary static analysis technology, slayers of literally millions of security bugs.
+<br><br>
+<b>IMPORTANT NOTICE: Don't fall for impersonations! I do not post to Full-Disclosure or similar sites and lists.</b> There are also a fair number
+of photoshops of me out there. They're all very flattering. 
+<br><br>
+While we have been known to engage in witty banter, <b>I am not affiliated with Comex</b> and I do not develop jailbreaks for any platform.
+</p>
+
+<p>
+<img src="img/teto100.png" style="float:left;"> By far the most reliable way to communicate with me is <a href="http://twitter.com/#!/0xabad1dea">Twitter</a>. I do read everything that contains an at-mention of me, but please do not be offended if I do not reply to all of them individually.
+<br><br>
+I occasionally update <a href="http://abad1dea.tumblr.com/">my tumblr</a> with cute pictures, generally Vocaloid/Utau themed with a pinch of Touhou. Tumblr, incidentally, does not allow usernames with a leading 0x for no apparent reason, for which I hate them forever.
+<br><br>
+If you are wondering: the pink girl in my avatar is <a href="http://vocaloid.wikia.com/wiki/Kasane_Teto">Kasane Teto</a>, the fictional face of a female voice synthesizer module for the freeware program <a href="http://utau.wikia.com/wiki/UTAU_wiki">UTAU</a>. She is an affectionate parody of <a href="http://vocaloid.wikia.com/wiki/Hatsune_Miku">Hatsune Miku.</a> 
+</p>
+
+
+<p>
+<span class=head>Content?!</span> I forgot to give my old webhost my new billing address and they cancelled my account without contacting me. My fault really, but a few minor things may be lost because I was just uploading stuff and editing flatfiles haphazardly. You are probably looking for one of these things:
+<br><br>
+<img src="img/nes-ansi.png" style="float:left;"> My hand-drawn ANSI font for NES, including bonus wingdings. You may also grab the image to the left and do whatever you want with it, I don't really care. Edit the CHR file with YY-CHR.
+<a href="bin/ansi-thin.chr">Download</a>
+<br clear=all><br>
+Several years ago I had a shell on a real, actual VAX, and discovered a critical shortage of documentation on the internet. I actually resorted to rescuing the user manual from my university library's back room to find the information I needed. What I learned is distilled in this textfile for assembly programming the machine, which I have left totally unedited from its original form: <a href="vaxhax-0xabad1dea.txt">Download</a>
+<br><br>
+<img src="img/ioripple.png"> 
+<br clear=all>
+I did a boot sector DOS demo for an IRC channel called #io. It is a trippy melty effect that goes on forever and I am kind of proud of it, as it does not use sine tables or any tricks like that. <a href="bin/ioripple.iso">Binary</a> - <a href="ioripple.asm">Source</a> (includes instructions to build and run) - <a href="http://www.youtube.com/watch?v=UWIeyyf66sE">Video</a>
+<br><br>
+I swear I will finish Neslyric someday. Someday.
+<br>
+</p>
+
+<p>
+You should play <a class=nav href=http://bay12games.com/dwarves/> 
+Dwarf Fortress</a>, a completely free game available for Windows, Linux, and OSX. It is a top-down "roguelike" fantasy world simulator with deliberately old-fashioned graphics, where you can either direct a bunch of dwarves in carving out a mountainhome or control a single adventurer out in the world. It is ridiculously complicated and prone to disaster. For example, my most recent fort at time of writing ended early when an unattended litter of puppies starved to death in my dining hall and immediately raised as undead, killing five unsuspecting dwarves within seconds. 
+<br><br>
+You should also read the fantasy adventure webcomic <a href="http://drowtales.com">Drowtales</a>, assuming you can handle the frequent character death.
+
+</p>
+
+<p>
+You may also be interested in the site of my friend <a class=nav href=http://mispy.me/>Mispy</a>, who was once described by someone who had no idea what they were talking about as "the acolyte to Abadidea's high priestess." 
+</p>
+
+<!-- I have yet to find out what religion I am the high priestess of. -->
+
+<p>This is a personal site that does not officially represent anyone or anything, including myself. Image credits: <a href="
+http://www.pixiv.net/member_illust.php?mode=medium&illust_id=17863831">
+Teto Heart</a> - 
+<a href="http://www.pixiv.net/member.php?id=46764">Teto Clap</a></p>
+
+<p class=head>Last update: Feb 19 2012<br>&copy; 0xabad1dea 2012</p>
+
+</div> <!-- /mainbar -->
+
+
+</body></html>
+
+<!-- 厄 -->
