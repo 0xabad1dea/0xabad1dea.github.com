@@ -1,34 +1,199 @@
 <!DOCTYPE HTML PUBLIC "-//W3C/DTD HTML 4.01 Transitional//EN">
 <!-- ooooh look at you, ogling my source with your sinful eyes -->
-<!-- it's actually really messy and there's probably some orphan </div> tags -->
-<!-- I DON'T NEED YOUR JUDGEMENT -->
-
-<!-- here I am now crediting FONT AWESOME http://fortawesome.github.com/Font-Awesome/#
-	and twitter bootstrap and stuff like that -->
 
 <html>
 <head>
-	<title>Segfault At Address 0xabad1dea</title>
+	<title>Segmentation Fault At Address 0xABAD1DEA</title>
 	<meta name="keywords" content="0xabad1dea abadidea 
- vgm chiptune 6502 2a03 retroprogramming nes nintendo static analysis security infosec compsec">
-	<meta name="description" content="A Bad Idea, crashing stuff at no extra charge">
-	
-	<link href="bootstrap.css" rel="stylesheet">
+ vgm chiptune 6502 2a03 retroprogramming nes nintendo static analysis security infosec compsec sdr rtl-sdr">
+	<meta name="description" content="Not taking information security seriously enough since 2011">
 </head>
+<!--
+	whiteyellow	#f8f0db
+	whitepink	#f8ebee
+	paleyellow	#f6f6de
+	palepink	#f7e1e1
+	pink		#f3c1cd
+	coral		#f1a995
+	orange		#f0be51
+	yellow		#eeeea9
+	Strawberry Melissa	#d56868
+-->
 
 <body>
 <style>
+@import url(http://fonts.googleapis.com/css?family=Quattrocento+Sans:400,700);
 
-@font-face
-{
-font-family: fontawesome;
-src: url('fontawesome-webfont.ttf'),
-     url('fontawesome-webfont.eot'); /* IE9 */
+body { 
+background-color: #f5f5f5;
+margin-top: 10px;
+font-family: 'Quattrocento Sans', sans-serif;
 }
 
-.icon {
+a {
+color:#d56868;
+/*letter-spacing:3px; */
+/*border: #f8f0db solid 1px;*/
+text-decoration:none;
+/*-moz-border-radius: 4px;
+-webkit-border-radius:4px;*/
+}
 
-font-family:fontawesome;
+a:hover {
+border-bottom:#f1a995 dashed 1px;
+}
+
+
+p {
+background-color: #f5f5f5;
+border: #eeeeee solid 1px;
+color: #585858;
+font-size: 12pt;
+padding:8px;
+text-align:justify;
+margin-top:10px;
+margin-left:5%;
+margin-right:5%;
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius:5px;
+line-height:160%;
+}
+
+ul {
+color: #585858;
+background-color:#f8f0db;
+width:80%;
+font-family: tahoma, serif;
+font-size: 10pt;
+padding:5px;
+position:relative;
+left:10%;
+}
+
+li:first-letter {
+color:black;
+}
+
+
+.head {
+background-color: #f6f6de;
+border:  #f6f6de solid 1px;
+color:#484848;
+padding:3px;
+text-align:center;
+letter-spacing:2px;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+}
+
+p.head {
+font-weight:bold;
+margin-left:8%;
+margin-right:8%;
+}
+
+span.head {
+line-height:200%;
+}
+
+p.nav {
+width:120px;
+border-left:none;
+border-right:none;
+border-top: #f1a995 solid 1px;
+border-bottom: #f1a995 solid 1px;
+font-size:8pt;
+text-align:right;
+margin-top:10px;
+margin-bottom:10px;
+-moz-border-radius:0px;
+-webkit-border-radius:0px;
+border-radius:0px;
+}
+
+a.nav {
+line-height:135%;
+
+}
+
+i {
+
+}
+
+.techbar {
+	width:47%;
+	position:absolute;
+	top:10px;
+	left:0px;
+	margin-left:2%;
+	background-color: #ffc1cd;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius:5px;
+}
+
+.creativebar {
+	width:47%;
+	position:absolute;
+	top:10px;
+	right:0px;
+	margin-right:2%;
+	background-color:#f1a995;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius:5px;
+}
+
+
+.navbar {
+position:absolute;
+top:0px;
+right:0px;
+border-left: #f1a995 solid 1px;
+border-bottom:  #f1a995 solid 1px;
+width:130px;
+-moz-border-radius-bottomleft:5px;
+-webkit-border-bottom-left-radius:5px;
+border-bottom-left-radius:5px;
+}
+
+
+
+.fancy {
+text-transform: uppercase;
+letter-spacing:4px;
+font-family:sans;
+}
+
+
+.code {
+font-family: monospace;
+background-color: #f6f6de;
+border: #f7e1e1 dashed 2px;
+white-space:pre;
+width:600px;
+min-height:100px;
+height:200px;
+padding:4px;
+}
+
+img { 
+border:0px; 
+}
+
+.outline { 
+border: #f1a995 solid 1px; 
+margin: 3px;
+}
+
+.rounded {
+/*background-color:white;*/
+border: 1px solid #f1a995;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
 }
 
 
@@ -36,142 +201,151 @@ font-family:fontawesome;
 
 
 
-    <div class="container">
 
+<!-- content -->
 
-<header class="jumbotron subhead" id="overview" style="margin-top:20px;">
-  <div class="row">
-    <div class="span6">
-      <h1 style="font-family:Source Code Pro; font-size:60px;">
-      <span class="icon">
-      &#xf09c;
-      </span>
-      0xABAD1DEA</h1>
-      <p class="lead">it's pronounced "a bad idea"</p>
-    </div>
-    <div class="span6">
-      <div class="bsa well">
-      <center>
-          <div style="font-size:18px;">(also sometimes known as Melissa Elliott)</div>
-        </center>
-      </div>
-    </div>
-  </div>
+<!-- main column start -->
+<div class=techbar>
+<p class=head> TECHNICAL </p>
 
-</header>
+<noscript><p><b>NOSCRIPT: This page uses no javascript but it does use a custom TTF font.</b></p>
+</noscript>
 
-
-
-<section id="typography">
-  <div class="page-header" style="margin-top:0px;"><i>
-I break code. Sometimes just by entering my name into registration fields. Sometimes I even file bug reports. Sometimes.
-</i>
-  </div>
-
-  <!-- Headings & Paragraph Copy -->
-  <div class="row">
-
-    <div class="span4">
-      <div class="well">
-        <h1>
-        <span class="icon">&#xf099;</span>
-        <a href="https://twitter.com/0xabad1dea">Twitter</a><br>
-        <span class="icon">&#xf09b;</span>
-        <a href="https://github.com/0xabad1dea">Github</a><br>
-        <span style="font-size:38px; padding-right:6px;"><b>&#x03b1;</b></span>
-        <a href="https://alpha.app.net/0xabad1dea">AppDotNet</a><br>
-        <span class="icon">&#xf0e0;</span>
-        <a href="mailto:melliott_veracode_com">Work</a><be>
-        </h1>
-      </div>
-      
-      <div class="well" style="text-align:justify;">
-      <b>Journalists!</b> I generally can't do phone interviews. If you want to quote me as a professional researcher it needs to be emailed to me and cleared with the mysterious powers that be. Just linking to something I said on Twitter is fine as long as you don't imply it's representative of my employer. I prefer to be cited as 0xabad1dea (that's a zero and a one) when representing myself. Please note for pronoun purposes that <b>I am not a man!</b><br><br>
-     If you email me, is a very good idea to also hit me up on Twitter or the email might sit there for a while. <br><br>
-     I'm currently not available for talks or lectures except in New England.
-      </div>
-      
-      <div class="well" style="text-align:justify;">
-      <h4>The Githubber's Downtime Prayer</h4>
-      Our uptime who art in heaven, github be thy name. Thy pingdom come, thy push be done, on remote as it is in local. Give us this day our daily build, and forgive us our breakages, as we forgive those who push broken builds to us. Lead us not into abandonware, but deliver us from bitrot, for thine is the commit, the bisect, and the blame forever, amen. 
-      </div>
-      
-    </div>
-
-    <div class="span8">
-      <noscript>
-      <p><i>Well look at you and your bad noscript-running self! Yeah! If the fonts look funny it's your fault</i></p>
-      </noscript>
-      
-      <p>
-      <img src="https://si0.twimg.com/profile_images/1545927103/8h2SR.jpg" style="float:left; width:100px; height:97px;"> 
-      What's so special about 2,880,249,322? Nothing really, it's just a number all my own. I picked this handle on a whim and it stuck; I'd like to think I actually have a lot of good ideas. I'm a Linux person who somehow became an OSX/iOS person, I do NES programming and chiptunes, I love Dwarf Fortress and Vocaloid, and I do not actually have pink hair. Usually.</p>
-      
-     <p>
-      I am a computer security researcher playing defense at <a href="http://veracode.com">Veracode,</a> home of the world's finest binary static analysis technology, slayers of literally millions of security bugs. My job is to work on programs that find bugs in other programs, but I'm primarily known for getting comically angry about companies and organizations botching their response to a security breach. My motto is <i>bugs happen, bad responses don't have to.</i> You will see me throwing hissy fits whenever someone chooses to prioritize their PR over the safety of their userbase, or whenever a plaintext or unsalted password dump leaks to pastebin.
-      
-</p><p>
-<b>IMPORTANT NOTICE: Don't fall for impersonations! I do not post to Full-Disclosure or similar sites and lists.</b> I haven't actually done a lot of the stuff people seem to think I have. For example, I am <i>not</i> on any jailbreak development team, I'm <i>not</i> involved with Comex (at least, last I checked) <!-- he is pretty adorkable though --> and I am not hacking into your Flash plugin. <a href="http://www.zdnet.com/blog/security/how-google-set-a-trap-for-pwn2own-exploit-team/10641">Maybe.</a>
-      </p>
-      
-     
-
-
-<h3>Some stuff I've written</h3>
 <p>
-<a href="http://abad1dea.tumblr.com/post/23487860422/analyzing-binaries-with-hoppers-decompiler">Analyzing Binaries With Hopper's Decompiler</a> - introduction to decompiling x86 binaries for aspiring hobbyists.
-<br>
-<a href="http://abad1dea.tumblr.com/post/26496565466/is-the-vibe-messaging-app-safe-for-protestors">Is the Vibe messaging app safe for protestors?</a> An evening spent discovering that an "anonymous" app is pretty much anything but.
-<br>
-<a href="http://abad1dea.tumblr.com/post/28815774245/our-enemy-the-optimizer">Our Enemy the Optimizer</a> - understanding highly optimized x86 disassembly and how it relates to what the source code looked like before the compiler got its grubby hands on it.
-<br>
-<a href="http://www.veracode.com/blog/2012/07/how-sally-got-owned-an-illustrated-example-of-how-piracy-can-endanger-your-mobile-device/">How Sally Got Owned</a> - An illustrated example of how piracy can endanger your mobile device. Possibly the most cutesy thing ever posted to a real security company's official blog.
-<br>
-<a href="http://www.veracode.com/blog/2012/09/ubuntu-snafu-privacy-is-hard-lets-go-shopping/">Ubuntu Snafu - Privacy Is Hard, Let's Go Shopping</a> Exploring the problem of enabling cloud-aware searching on your desktop.
+I am 0xabad1dea (the zero-x is silent), a professional application security researcher also known as Melissa Elliott. If my name breaks your website we have a personal problem. My long-term goal is to convince programmers that the security of everything from the global economy all the way up to online Pokémon battles is in their hands and they need to take that responsibility seriously. My primary means of interacting with the community is through my extremely active <a href="https://twitter.com/0xabad1dea">Twitter account.</a> 
+</p>
+
+<p>Due to the stresses of travel I am not currently accepting any invitations to do anything outside of New England. I am very flattered every time someone puts me so high on their list, but I cannot make it.</p>
+
+<p>Nothing motivates me as much as spite. Do not send me your privacy product pitch or your patented cryptography. The pink and ✧sparkles✧ are nothing but a protective veil over the spinning power core of my bitter hatred.</p>
+
+
+
+
+<p class=head>Public Research</p>
+
+<p>I presented at DEF CON 21 (2013) with an introduction to unintentional radio emissions produced by electronics and how to get started measuring and observing them with ten dollars of equipment. <a href="http://www.youtube.com/watch?v=5N1C3WB8c0o">Video</a> - <a href="https://docs.google.com/presentation/d/1Z_IRt6R2FL7POeY4J-pYGLDAIAdEHprQY13f-NVIfwE/edit#slide=id.p">Slides</a><br><br>
+
+My conclusions in broad terms are that we should include auditing the emissions of our devices as part of our protections against <a href="http://www.nsa.gov/">sufficiently advanced</a> adversaries of various sorts.
+<br><br>
+I realize I look like a total dork. The stage crew opined that I was too short for the podium and the block they gave me to stand on induced the opposite problem. It was my first big presentation and I can't bear to watch it.
+</p>
+
+<p class=head>Commercial Research</p>
+<p>I work on/with/in the binary static analysis engine at <a href="http://veracode.com">Veracode.</a> It's basically cheating at the halting problem as a career. I see bad code every day that could kill a bear from twenty paces. Trivial buffer overflows from the network. Executing the contents of $_GET. Currency stored in floats. XSS and SQLi by the <i>millions.</i> My frequent commentary on security engineering is informed by seeing literally thousands of distinct programs written by many different companies and organizations and the bugs therein. 
 
 </p>
 
 
-<h3>Some stuff I've made</h3> 
+
+<p class=head>Hating PHP As A Service</p>
 <p>
-<img src="http://0xabad1dea.github.com/img/nes-ansi.png" style="float:left; padding:4px;">
- My hand-drawn ANSI font for NES, including bonus wingdings. You may also grab the image to the left and do whatever you want with it, I don't really care. Edit the CHR file with YY-CHR.
-<a href="bin/ansi-thin.chr">Download</a>
-</p><br clear=all><br><p>
-Several years ago I had a shell on a real, actual VAX, and discovered a critical shortage of documentation on the internet. I actually resorted to rescuing the user manual from my university library's back room to find the information I needed. What I learned is distilled in this textfile for assembly programming the machine, which I have left totally unedited from its original form: <a href="vaxhax-0xabad1dea.txt">Download</a>
-</p><p>
-<img src="http://0xabad1dea.github.com/img/ioripple.png" style="float:left; padding:4px;"> 
-I did a boot sector DOS demo for an IRC channel called #io. It is a trippy melty effect that goes on forever and I am kind of proud of it, as it does not use sine tables or any tricks like that. <a href="bin/ioripple.iso">Binary</a> - <a href="ioripple.asm">Source</a> (includes instructions to build and run) - <a href="http://www.youtube.com/watch?v=UWIeyyf66sE">Video</a>
-</p><br clear=all><br><p>
-I swear I will finish Neslyric someday. Someday.
+I write an entire blog based around my ongoing hate affair with PHP. It's <a href="http://phpmanualmasterpieces.tumblr.com/">very vitriolic.</a> Surely you don't want any of that.
 </p>
 
-<h3>Some other stuff</h3>
+
+
+<p class=head>Articles</p>
 <p>
-If you are wondering: the pink girl in my avatar is <a href="http://vocaloid.wikia.com/wiki/Kasane_Teto">Kasane Teto</a>, the fictional face of a female voice synthesizer module for the freeware program <a href="http://utau.wikia.com/wiki/UTAU_wiki">UTAU</a>. She is an affectionate parody of <a href="http://vocaloid.wikia.com/wiki/Hatsune_Miku">Hatsune Miku.</a> The original image is from <a href="http://www.pixiv.net/member.php?id=46764">here.</a> Contrary to widespread rumor, my favorite color is actually orange.
-</p><p>
-<p>
-If IDA is a little out of your budget you should buy <a href="http://www.hopperapp.com/">Hopper</a> disassembler/compiler RIGHT NOW (buy it straight from the site, not the App Store, if at all possible) (NOW FOR ALL THREE MAJOR DESKTOP OPERATING SYSTEMS). I can't say enough good things about how responsive the dev is to bug reports and feature requests.
-</p><p>
-You should play <a href=http://bay12games.com/dwarves/> 
-Dwarf Fortress</a>, a completely free game available for Windows, Linux, and OSX. It is a top-down "roguelike" fantasy world simulator with deliberately old-fashioned graphics, where you can either direct a bunch of dwarves in carving out a mountainhome or control a single adventurer out in the world. It is ridiculously complicated and prone to disaster. For example, my most recent fort at time of writing ended early when an unattended litter of puppies starved to death in my dining hall and immediately raised as undead, killing five unsuspecting dwarves within seconds. </p>
-<p>
-You should also read the fantasy adventure webcomic <a href="http://drowtales.com">Drowtales</a>, assuming you like lady warriors.
+Sometimes I write stuff for edutainment.<br><br>
+<a href="http://www.veracode.com/blog/2013/05/executable-archaeology-the-case-of-the-stupid-thing-eating-all-my-ram/">Executable Archaeology - The Case Of The Stupid Thing Eating All My RAM</a> My all-time most popular article, exploring how a simple debug feature shipped in production tanked my machine.
+<br><br>
+<a href="http://abad1dea.tumblr.com/post/23487860422/analyzing-binaries-with-hoppers-decompiler">Analyzing Binaries With Hopper's Decompiler</a> is starting to age due to Hopper still being under active development.
+<br><br>
+<a href="http://abad1dea.tumblr.com/post/26496565466/is-the-vibe-messaging-app-safe-for-protestors">Is the Vibe messaging app safe for protestors?</a> This is that spite-driven research I warned you about.
+<br><br>
+<a href="http://abad1dea.tumblr.com/post/28815774245/our-enemy-the-optimizer">Our Enemy The Optimizer</a> an introductory look at the unspeakable horrors visited on your source code by the unfeeling machine.
+<br><br>
+<a href="http://www.veracode.com/blog/2012/07/how-sally-got-owned-an-illustrated-example-of-how-piracy-can-endanger-your-mobile-device/">How Sally Got Owned</a> a hand-illustrated explanation of how techniques used by mobile game pirates open your device to being hacked.
+<br><br>
+<a href="http://www.veracode.com/blog/2012/09/ubuntu-snafu-privacy-is-hard-lets-go-shopping/">Privacy Is Hard, Let's Go Shopping</a> A beta feature in Ubuntu opens up users to serious privacy breaches. 
+
 </p>
 
-<h4>Last update: Dec 23, 2012 &copy; 0xabad1dea 2012<br>
-This site don't officially represent nuthin'</h4>
-
-      
-    </div>
-
-    
-
- 
-
-</section>
 
 
-</body>
-</html>
-<!-- 厄 -->
+<p class=head>That time I had to use a VAX</p>
+<p>
+Several years ago as a student I had a shell on a real, actual VAX, and discovered a critical shortage of documentation on the internet. I actually resorted to rescuing the user manual from my university library's back room to find the information I needed. What I learned is distilled in this textfile for assembly programming the machine, which I have left totally unedited from its (embarrassing) original form: <a href="http://0xabad1dea.github.io/vaxhax-0xabad1dea.txt">VAXHAX</a>
+</p>
+
+
+
+
+
+
+<p class=head>Formal Credentials</p>
+<p>I have a bachelor's degree in computer science from a small private university. Far more impressive is my twenty four thousand reddit comment karma, don't you think?
+</p>
+
+
+
+
+<p class=head>And as an aside</p>
+<p>
+Like everyone in infosec, I have a few haters. Some have gone so far as to forge texts in my name. Please apply common sense in determining whether <i>I</i> would post my real-world mailing address to full-disclosure for no apparent reason. (Also, any further hatemail directed to that address will reach strangers.)
+</p>
+
+
+</div> <!-- /techbar -->
+
+
+
+
+<!-- ---------------------------------------------- -->
+
+
+
+<div class=creativebar>
+<p class=head>CREATIVE</p>
+
+<p>
+Listen. None of that stuff on the left is important. Hacking, radio waves, whatever. I WROTE A NOVEL. It's called <i>Glory in the Thunder</i> and it's actually just the first volume of a story I have been working on for <i>years.</i> It's gaslamp fantasy which is sort of like steampunk. <a href="http://gloryinthethunder.com/">↬You should buy it.↫</a> It's really cheap and it's my life's work.
+</p>
+
+<p>
+I fancy myself a chiptune composer but in truth I'm only kinda sorta competent at music. As far as chiptunes go, I work in 2A03 (the 6502-based chip inside the original Nintendo) with no expansions using the PP-MCK text-based compiler. I also do more "normal"-sounding music with orchestra soundfonts. It's basically all just theme-music for my own novel characters though. It all goes on my <a href="https://soundcloud.com/0xabad1dea">soundcloud.</a> I'm not really involved with the chip scene. Some people there have been encouraging but I encountered hostility towards beginners one too many times and bailed.
+</p>
+
+<p>
+That being said, I will <i>totally</i> call you out if you call anything vaguely chip-sounding or pixelated-looking "eight-bit" without reference to a real eight-bit computing platform. There's nothing wrong with these retro-inspired works of art, but oftentimes "eight-bit" is a wildly misapplied label. Since I actually <i>program</i> in assembly on 8 and 16-bit platforms I'm kinda picky about this.
+</p>
+
+
+<p class=head>My NES Font</p>
+<p>
+A long time ago I wrote a simple text editor program for Famicom (NES) with the obscure keyboard peripheral. (The typing keyboard, not the piano one - which I actually own!) I couldn't find anyone with an actual keyboard to test it with so I had to rely on some rudimentary support in an emulator and hope it was right. However I ended up doing a complete font for it with ANSI extended characters and some people asked to reuse it. You may use it for whatever with attribution. You can grab the PNG or the <a href="http://0xabad1dea.github.io/bin/ansi-thin.chr">NES rom file</a> editable with YY-CHR.<br>
+<img src="http://0xabad1dea.github.com/img/nes-ansi.png">
+</p>
+
+<p class=head>That trivial demo I'm still proud of</p>
+<p>
+<img src="http://0xabad1dea.github.com/img/ioripple.png"><br>
+ An IRC channel called #io had a contest to do a boot sector demo, the only real rule was it had to feature their name. I came up with this really weird/cool infinite melting effect. <a href="http://0xabad1dea.github.io/bin/ioripple.iso">Binary</a> - <a href="http://0xabad1dea.github.io/ioripple.asm">Source</a> (with instructions) - <a href="http://www.youtube.com/watch?v=UWIeyyf66sE">Video</a>
+</p>
+
+<p class=head>My Avatar</p>
+<p>
+The pink girl in my Twitter avatar is called Kasane Teto. She is essentially a parody of Hatsune Miku, the Japanese "pop star" character developed to market voice synthesis. The artwork I use originates <a href="http://www.pixiv.net/member.php?id=46764">here.</a> (It will bring you to the artist's profile rather than directly to the artwork unless you have signed in.) Contrary to widespread rumor, my favorite color is actually orange.
+</p>
+<p class=head>Things I Like</p>
+<p>
+I like <a href="http://bay12games.com/dwarves/">Dwarf Fortress</a>, an absurdly complex simulation game for all three major desktop operating systems. I donate once a year to encourage the madman behind it.
+<br><br>
+I like to shamelessly advocate for action adventure comic <a href="http://drowtales.com/">Drowtales.</a>
+<br><br>
+I like human rights. I advocate for feminism (and get really sad at people who think feminism is some sort of kill-all-menism), orientation rights, gender identity rights, freedom of/from religion, etc. I am anti-mass-surveillance and do not draw an ethical distinction between my fellow American citizens and the ~94% of human beings who are not my fellow American citizens.
+<br><br>
+I like Dutch. I can more or less read it. Just don't ask me to write it!
+</p>
+
+<p class=head>Last updated Nov 27 2013</p>
+<!-- yes, I know you can check the github repo too. -->
+
+
+</div> <!-- /creativebar>
+
+
+</body></html>
+
+<!-- your preferred text editor is inferior to mine -->
