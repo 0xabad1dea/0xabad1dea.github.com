@@ -1,0 +1,16 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+if I ever lose control of this account, the new one will decode 96a21b9d18e011bfc960e55d31f1695411013d83aaadb9b699bb2d845fa2c627
+-----BEGIN PGP SIGNATURE-----
+Version: Keybase OpenPGP v1.1.3
+Comment: https://keybase.io/crypto
+
+wsBcBAABCgAGBQJUYlKFAAoJENpjzDDB/osSgZcH/3m/b47Go8LzdSFKbj+H2smy
+BhQztSos9uSqzjVyJHQCPqfFI9uRmOkn2Tu/NFmxmKHV72ockJl9K0jXhcdo3UGL
+GK6m7O3moqyOgAMCwQ0vfK9tllt8KuI+S8QSMSUwWSS6nZmES6kOsCWFG2SbCeyq
+RCL2aOMC7VrXCu6iQKl8uUW7hV/yKe3pE5/p1wV7AvHcmyA1Ay/ciehVK7jrmqCW
+NQ2o+DprFhPWwRK1FF2+A7N4iA0MMhljXkKnM/ig6YOfKojJupkoaCbK9yt/abYS
+GA7ObcNeroNYsUn4wzATqwPsNuS4Kg0ALWfk7A55XQfINgUxjMiqUZjUhgSKr6Y=
+=dGto
+-----END PGP SIGNATURE-----
