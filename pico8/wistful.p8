@@ -2,6 +2,8 @@ pico-8 cartridge // http://www.pico-8.com
 version 7
 __lua__
 print("0xabad1dea - wistful waltz")
+print("creative commons attribution")
+print("github.com/0xabad1dea/glorytales/")
 music(0)
 
 function _update()
