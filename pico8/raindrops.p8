@@ -1,7 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
-version 7
+version 8
 __lua__
-print("0xabad1dea - rainsong")
+print("0xabad1dea - raindrops")
+print("creative commons attribution")
+print("github.com/0xabad1dea/glorytales")
 music(0)
 
 function _update()
