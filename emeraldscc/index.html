@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A book that examines and explains the source code of Emerald, one of the most popular video games ever made, based on the decompilation work of PRET.">
+    <meta name="author" content="0xabad1dea">
+    <link rel="canonical" href="https://0xabad1dea.github.io/emeraldscc/">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    
+    <title>Introduction - Emerald Source Code Commentary</title>
+    
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="css/base.min.css" rel="stylesheet">
+    <link href="css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="css/override.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+     
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            
+              <a class="navbar-brand" href=".">Emerald Source Code Commentary</a>
+            
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href=".">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Chapters <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li class="active">
+    <a href=".">Introduction</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="layout/">Overall Structure and Layout</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="about/">About</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fas fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href=".">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="layout/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#emerald-source-code-commentary">Emerald Source Code Commentary</a></li>
+            <li class="second-level"><a href="#introduction">Introduction</a></li>
+                
+            <li class="second-level"><a href="#decompiliation">Decompiliation</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="emerald-source-code-commentary">Emerald Source Code Commentary</h1>
+<p><strong>by 0xabad1dea, April 2023</strong></p>
+<p>The Emerald Source Code Commentary is a book in the spirit of <a href="https://cs3210.cc.gatech.edu/r/unix6.pdf">"A Commentary on the Sixth Edition Unix Operating System"</a> that examines and explains the source code of one of the most popular video games ever made, based on the decompilation work of <a href="https://github.com/pret/pokeemerald">PRET</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is strongly recommended to have the <a href="https://github.com/pret/pokeemerald/">PRET Emerald</a> repository opened in a tab or downloaded locally to a source code editor while reading.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This book will occasionally cite small amounts of the original copyrighted source code. This is a courtesy notice to anyone obligated to maintain a clean-room status.</p>
+</div>
+<h2 id="introduction">Introduction</h2>
+<p>Video games are a crucial component of modern art and culture. They deserve to be preserved, they deserve to be accessible, and they deserve to be studied.</p>
+<p>In the 1977 Commentary that introduced so many students to operating systems, J. Lions laid out the case for studying Unix in particular:</p>
+<blockquote>
+<ul>
+<li><em>it runs on a system which is already available to us;</em></li>
+<li><em>it is compact and accessible;</em></li>
+<li><em>it provides an extensive set of very usable facilities;</em></li>
+<li><em>it is intrinsically interesting, and in fact breaks new ground in a number of areas.</em></li>
+</ul>
+</blockquote>
+<p>Pokemon Emerald is a similarly ideal case study for the structure and implementation of video games:</p>
+<ul>
+<li>the GBA platform can be emulated on absolutely anything;</li>
+<li>the game is modest in scope and written in C rather than assembly;</li>
+<li>it embodies every system expected of a 2D tile-based RPG;</li>
+<li>Pokemon is intrinsically interesting.</li>
+</ul>
+<p>Released in 2004, Emerald rests at the balance point between small games written entirely in assembly and the modern AAA behemoth. At the ancient end, one spends too much time keeping mental track of registers and status flags to perceive the game; at the other extreme, the code in its totality (to include all the underlying drivers and libraries) is so large that not one single person actually does understand all of it. There is nothing running underneath a GameBoy Advance game. The hardware only runs a boot routine to display the logo and check that the cartridge appears to be valid before jumping to its entry point, at which point the game has absolute control. The BIOS burned into the hardware also contains some utility functions that it was expected almost every game would need; they are <a href="https://problemkaputt.de/gbatek.htm#biosfunctions">well-documented</a>. Absolutely everything else needed to run the game is inside the game itself.</p>
+<p>It is recommended to check out a <a href="https://www.copetti.org/writings/consoles/game-boy-advance/">general overview</a> of GBA hardware capabilities. The <a href="https://problemkaputt.de/gbatek.htm">GBATEK</a> document contains the nittiest of grit.</p>
+<h2 id="decompiliation">Decompiliation</h2>
+<p>It may be surprising to see a commentary on the source code of a closed-source commercial game, especially from such a notoriously jealous and vengeful company. It so happens that the real, full original source code of Emerald <em>is</em> available on the internet. It's stolen, obviously. Aside from that, there are a few reasons to hesitate from referencing it heavily: the leaked version is for the Japanese edition of the game without the English translation, the comments are in Japanese and in a pre-Unicode encoding that will not render correctly in modern editors, and the variables (which in C must always be in ascii) are written in improvised wasei-eigo indecipherable to anyone but the original programmers:</p>
+<pre><code class="language-c">//----------------------------------------------------------
+//  �{�[���̱���No���ްق�ð���No�ɕϊ�����
+//----------------------------------------------------------
+
+case ITEM_GOOZYASUBOORU:
+        tblno = EF_GOUJYASU_BALL;
+        break;
+</code></pre>
+<p><em>(Note the two wildly different spellings of the same item name.)</em></p>
+<p>Therefore, this commentary is built on the stellar work of PRET (Pokemon Reverse Engineering Team) to produce a new body of decompiled source code that compiles exactly to the official English release of the Emerald ROM down to the last byte. You can <a href="https://github.com/pret/pokeemerald">browse the code base</a>, download your own copy, compile it, and freely make changes. The comments and variable names follow English coding conventions. Reverse engineering the game to this level of perfection was an <em>enormous</em> amount of work and it was not done by the author of the Commentary. Please check the <a href="https://github.com/pret/pokeemerald/graphs/contributors">contributors</a> page for more information.</p>
+<p>Due to ongoing improvements in matters such as variable names and file structure, the current state of the PRET repository may not be identical to the code as quoted in the Commentary. However, since it is a round-trip decompiliation (that is, it recompiles to its exact original state), the code as a whole will always be functionally identical.</p>
+<p>Since the decomp is based on the commercial release, all the debug tooling present in beta builds of the game is absent. Check <a href="https://tcrf.net/Proto:Pok%C3%A9mon_Emerald">The Cutting Room Floor</a> for information on the Japanese-only debug tooling present in the leaked original source code. You can also consult the debug functionality present in <a href="https://github.com/pret/pokeruby/tree/master/src/debug">Ruby/Sapphire</a>.</p>
+<p>Like all Pokemon games, Emerald is riddled with bugs. In addition to reproducing the original ROM, the PRET code base also supports alternate compilation settings to fix logic bugs and avoid undefined behavior that angers a modern, more standards-compliant compiler. You will see these optional code snippets inside <code>#IFDEF</code> blocks.</p>
+<p>Continue on to <a href="layout/">Overall Structure and Layout</a>.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>2023 0xabad1dea</small><br>
+            
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/arm.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "."</script>
+    
+    <script src="js/base.js"></script>
+    <script src="search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

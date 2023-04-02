@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A book that examines and explains the source code of Emerald, one of the most popular video games ever made, based on the decompilation work of PRET.">
+    <meta name="author" content="0xabad1dea">
+    <link rel="canonical" href="https://0xabad1dea.github.io/emeraldscc/layout/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+
+    
+    <title>Overall Structure and Layout - Emerald Source Code Commentary</title>
+    
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../css/override.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+     
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            
+              <a class="navbar-brand" href="..">Emerald Source Code Commentary</a>
+            
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Chapters <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="..">Introduction</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Overall Structure and Layout</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../about/">About</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fas fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="..">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../about/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#overall-structure-and-layout">Overall Structure and Layout</a></li>
+            <li class="second-level"><a href="#memory-map-summary">Memory Map Summary</a></li>
+                
+            <li class="second-level"><a href="#rom-header">ROM header</a></li>
+                
+                <li class="third-level"><a href="#rom_header_gfc">rom_header_gf.c</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="overall-structure-and-layout">Overall Structure and Layout</h1>
+<p>When you write a typical C application for a modern operating system, you do not need to pay very much heed to the exact layout of system memory nor spell out a great many details to the linker about how your program needs to be loaded. Decades of abstraction layers insulate you and provide a highly standardized, sanitized environment for your program's running process.</p>
+<p>The GameBoy Advance is a bare-metal environment. There is no operating system  – or the game is its own operating system, whichever viewpoint one prefers. While the idealized memory abstraction presented to an OS-managed application is a single uniform space from <code>0x00000000</code> to <code>0xffffffff</code>, the real memory space of the hardware is broken down into pieces with different functionalities and there are often large gaps that aren't actually attached to anything. The GBA memory space includes the read-only BIOS (16KB), fast working RAM (32KB), slow working RAM (256KB), memory belonging directly to the screen (98KB), and space reserved for the cartridge's ROM (32MB) and optionally either battery-backed SRAM (64KB) or flash (64KB, bankswitchable) for save storage. The working (that is, "normal") RAM is split into fast and slow regions not because the designers thought you would like slower RAM, but to balance the device's cost against performance. The variables which the game updates constantly should be squeezed into fast RAM, with the rest on the slow boat.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A game cartridge can contain a "mapper" or "bankswitch" capability which connects and disconnects different chips on the cartridge board to the console's memory space dynamically. This allows the game to have more data than will fit by breaking it down into chunks that are never loaded at the same time. However, this was much more common in 8-bit and 16-bit games since 32-bit games have a much larger address space available even on systems (including the GBA) which only wire up part of it. You may be interested in my <a href="https://cohost.org/0xabad1dea/post/556171-ro-ms-and-mappers-wh">high-level overview</a> of how mappers are used on the NES.</p>
+</div>
+<p>It is therefore necessary to divide Emerald up into sections – the read-only code and data, the fast variables, the slow variables, and the save file – and explicitly instruct the compiler on what goes where in the final ROM. This is accomplished through linker scripts. It is fortunately not necessary to understand every detail of linker script syntax for our purposes. The scripts are found in <a href="https://github.com/pret/pokeemerald/blob/master/ld_script.txt">ld_script.txt</a> and the files it includes by name.</p>
+<p>Notice that there are two versions of the linker script in the repository: one which makes sure everything is placed <em>exactly</em> in the same spot they ended up in the original ROM (<code>ld_script.txt</code>), and one for modern compilers which will find any new modules you've added and not be too particular about the exact order (<code>ld_script_modern.txt</code>). The latter is useful if you are making substantial changes to the game. We are examining the exact-reproduction version so that what we see in the script will correlate exactly to what we see in the game's memory in a live debugger. In general, the ordering of different pieces of data within the same linking section is due to the order they were added to the code base or the alphabetical order of the original source filenames, and not because they <em>must</em> be in that specific order. The naming conventions used in linker scripts are extremely archaic and non-obvious: <code>.text</code> means executable code, <code>.data</code> means global or static variables (those which always have a persistent value) and <code>.bss</code> means transient variables that pop in and out of existence when their functions run. <code>.rodata</code> is read-only data which is, at least, actually what it sounds like.</p>
+<h2 id="memory-map-summary">Memory Map Summary</h2>
+<ul>
+<li>Read-Only BIOS (<code>0x00000000</code>)<ul>
+<li>Boot logo routine</li>
+<li>Function for validating ROM header and starting game</li>
+<li>Generic utility functions</li>
+</ul>
+</li>
+<li>Slow RAM (<code>0x02000000</code>)<ul>
+<li>112KB reserved for the heap (the memory you get from <code>malloc</code>)</li>
+<li>variables of files <a href="https://github.com/pret/pokeemerald/blob/master/sym_ewram.txt">manually listed</a> as okay for slow RAM (largely high-level game state that does not rapidly change)</li>
+</ul>
+</li>
+<li>Fast RAM (<code>0x03000000</code>)<ul>
+<li>variables of files <a href="https://github.com/pret/pokeemerald/blob/master/sym_bss.txt">manually</a> <a href="https://github.com/pret/pokeemerald/blob/master/sym_common.txt">listed</a> as needing fast RAM</li>
+<li>The stack for function-local variables is not explicitly listed in the linker script, but the game will set up the stack to point towards the end of fast RAM before calling <code>main</code>. It grows downwards, and it is the responsibility of the programmer to make sure functions can never chain so deeply that it will begin overwriting memory already in use.</li>
+</ul>
+</li>
+<li>Graphics (<code>0x05000000</code>)<ul>
+<li>current color palette</li>
+<li>Video RAM for rendering the screen</li>
+<li>OAM (Object Attribute Memory, that is, sprites)</li>
+</ul>
+</li>
+<li>Read-Only Memory (<code>0x08000000</code>)<ul>
+<li>ROM header</li>
+<li><code>crt0</code>, which does some housekeeping before <code>main</code> is called</li>
+<li><code>main</code></li>
+<li>more executable code in no special order</li>
+<li>Script data for the game event scripting engine</li>
+<li>more executable code</li>
+<li>data embedded in executable code (short strings, numerical constants, etc)</li>
+<li>songs</li>
+<li>even more code</li>
+<li>multiboot</li>
+<li>front sprites of each mon</li>
+<li>other graphics</li>
+</ul>
+</li>
+<li>
+<p>Flash Memory (<code>0x0E000000</code>)</p>
+<ul>
+<li>Not explicitly listed in linker scripts nor physically present in the ROM file, but two copies of the save game (so that if one is corrupt, the other might still be loadable) are kept here. Most emulators will dump it to a <code>.sav</code> file on your computer.</li>
+</ul>
+<h2 id="rom-header">ROM header</h2>
+<p>The header must always be at <code>0x08000000</code> exactly so the BIOS boot function knows where to find it. It contains the game's name (<code>POKEMON EMER</code>), its assigned ID code (<code>BPEE</code>) and its assigned publisher code (<code>01</code>, which obviously stands for the most important publisher.) It also contains the address of the entry point which the BIOS should jump to after it's satisfied the cartridge is valid, and the CRC checksum that the BIOS will compare against after checksumming the cartridge itself to make that validity check. Since the CRC can only be calculated against a finished ROM, blank space is reserved during the compile process and a command-line utility is used to patch in the correct value at the end of compiling. You can see the reservation of space in the ROM for the header in <a href="https://github.com/pret/pokeemerald/blob/master/src/rom_header.s">rom_header.s</a>, though it's not very exciting, and the patching happens in the <a href="https://github.com/pret/pokeemerald/blob/master/Makefile">Makefile</a>.</p>
+<p>The header wastes 156 bytes on including the same corporate logo in every single cartridge of every single game for silly legal reasons. The game will not boot if the logo in the game does not exactly match the logo in the BIOS, and (or so the reasoning went) if you include a copy of the logo without buying a license to do so, then you are opening yourself up to being sued off the face of the earth. Everyone has ignored this for over twenty years. </p>
+<p>There is a second header, <code>GFRomHeader</code>, which is particular to this game engine. It enumerates where to find various information from the save file or about this particular version of the game so that a host application (such as Colosseum on GameCube) can safely extract them from the cartridge. It also serves as handy mini-documentation for what keyword to search to find many things you may have been curious about:</p>
+</li>
+</ul>
+<h3 id="rom_header_gfc"><a href="https://github.com/pret/pokeemerald/blob/master/src/rom_header_gf.c">rom_header_gf.c</a></h3>
+<pre><code class="language-c">static const struct GFRomHeader sGFRomHeader = {
+    .version = GAME_VERSION,
+    .language = GAME_LANGUAGE,
+    .gameName = &quot;pokemon emerald version&quot;,
+    .monFrontPics = gMonFrontPicTable,
+    .monBackPics = gMonBackPicTable,
+    .monNormalPalettes = gMonPaletteTable,
+    .monShinyPalettes = gMonShinyPaletteTable,
+    .monIcons = gMonIconTable,
+    .monIconPaletteIds = gMonIconPaletteIndices,
+    .monIconPalettes = gMonIconPaletteTable,
+    .monSpeciesNames = gSpeciesNames,
+    .moveNames = gMoveNames,
+    .decorations = gDecorations,
+    .flagsOffset = offsetof(struct SaveBlock1, flags),
+    .varsOffset = offsetof(struct SaveBlock1, vars),
+    .pokedexOffset = offsetof(struct SaveBlock2, pokedex),
+    .seen1Offset = offsetof(struct SaveBlock1, seen1),
+    .seen2Offset = offsetof(struct SaveBlock1, seen2),
+    .pokedexVar = VAR_NATIONAL_DEX - VARS_START,
+    .pokedexFlag = FLAG_RECEIVED_POKEDEX_FROM_BIRCH,
+    .mysteryEventFlag = FLAG_SYS_MYSTERY_EVENT_ENABLE,
+    .pokedexCount = NATIONAL_DEX_COUNT,
+    .playerNameLength = PLAYER_NAME_LENGTH,
+    .trainerNameLength = TRAINER_NAME_LENGTH,
+    .pokemonNameLength1 = POKEMON_NAME_LENGTH,
+    .pokemonNameLength2 = POKEMON_NAME_LENGTH,
+    // Two of the below 12s are likely move/ability name length, given their presence in this header
+    .unk5 = 12,
+    .unk6 = 12,
+    .unk7 = 6,
+    .unk8 = 12,
+    .unk9 = 6,
+    .unk10 = 16,
+    .unk11 = 18,
+    .unk12 = 12,
+    .unk13 = 15,
+    .unk14 = 11,
+    .unk15 = 1,
+    .unk16 = 8,
+    .unk17 = 12,
+    .saveBlock2Size = sizeof(struct SaveBlock2),
+    .saveBlock1Size = sizeof(struct SaveBlock1),
+    .partyCountOffset = offsetof(struct SaveBlock1, playerPartyCount),
+    .partyOffset = offsetof(struct SaveBlock1, playerParty),
+    .warpFlagsOffset = offsetof(struct SaveBlock2, specialSaveWarpFlags),
+    .trainerIdOffset = offsetof(struct SaveBlock2, playerTrainerId),
+    .playerNameOffset = offsetof(struct SaveBlock2, playerName),
+    .playerGenderOffset = offsetof(struct SaveBlock2, playerGender),
+    .frontierStatusOffset = offsetof(struct SaveBlock2, frontier.challengeStatus),
+    .frontierStatusOffset2 = offsetof(struct SaveBlock2, frontier.challengeStatus),
+    .externalEventFlagsOffset = offsetof(struct SaveBlock1, externalEventFlags),
+    .externalEventDataOffset = offsetof(struct SaveBlock1, externalEventData),
+    .unk18 = 0x00000000,
+    .speciesInfo = gSpeciesInfo,
+    .abilityNames = gAbilityNames,
+    .abilityDescriptions = gAbilityDescriptionPointers,
+    .items = gItems,
+    .moves = gBattleMoves,
+    .ballGfx = gBallSpriteSheets,
+    .ballPalettes = gBallSpritePalettes,
+    .gcnLinkFlagsOffset = offsetof(struct SaveBlock2, gcnLinkFlags),
+    .gameClearFlag = FLAG_SYS_GAME_CLEAR,
+    .ribbonFlag = FLAG_SYS_RIBBON_GET,
+    .bagCountItems = BAG_ITEMS_COUNT,
+    .bagCountKeyItems = BAG_KEYITEMS_COUNT,
+    .bagCountPokeballs = BAG_POKEBALLS_COUNT,
+    .bagCountTMHMs = BAG_TMHM_COUNT,
+    .bagCountBerries = BAG_BERRIES_COUNT,
+    .pcItemsCount = PC_ITEMS_COUNT,
+    .pcItemsOffset = offsetof(struct SaveBlock1, pcItems),
+    .giftRibbonsOffset = offsetof(struct SaveBlock1, giftRibbons),
+    .enigmaBerryOffset = offsetof(struct SaveBlock1, enigmaBerry),
+    .enigmaBerrySize = sizeof(struct EnigmaBerry),
+    .moveDescriptions = NULL,
+    .unk20 = 0x00000000, // 0xFFFFFFFF in FRLG
+};
+</code></pre>
+<p>It is very curious that the game name is in all lower-case.</p>
+<p>The variables marked as "unknown" in the decomp have the following names in the original code:</p>
+<pre><code class="language-c">// unknowns 5-17
+WAZA_NAME_SIZE,
+ITEM_NAME_SIZE,
+SEED_NAME_SIZE,
+SPEABI_NAME_SIZE,
+ZOKUSEI_NAME_SIZE,
+MAPNAME_WIDTH,
+MAPNAME_MAX,
+TRTYPE_NAME_SIZE,
+GOODS_NAME_SIZE,
+ZUKAN_TYPE_SIZE,
+EOM_SIZE,
+BTL_TR_NAME_SIZE,
+KAIWA_WORK_SIZE,
+// unknown 18
+0
+// unknown 20
+static  const u8 IndexNull[ 0x100 - sizeof(POKEMON_ROM_HEADER)] = {}; 
+</code></pre>
+<p>Unknown 18 will take its secrets to the end of time, it seems. It's in a set of interoperability flags, but no name or explanation is given. Unknown 20 is not actually part of the structure in the original source code, but simply follows after it. It seems to be intended as padding to fill out 256 bytes, but its existence is pointless as the structure is 344 bytes. The ancient compiler the original team was using must have decided that an array with a negative length actually has a length of one rather than throwing an error which would have brought it to their attention as no longer needed.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>2023 0xabad1dea</small><br>
+            
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/arm.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = ".."</script>
+    
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>
