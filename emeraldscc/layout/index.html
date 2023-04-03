@@ -92,6 +92,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../initmain/">Init and Main</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -116,7 +122,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="next" href="../about/">
+                        <a rel="next" href="../initmain/">
                             Next <i class="fas fa-arrow-right"></i>
                         </a>
                     </li>
@@ -148,7 +154,7 @@
 <p>A game cartridge can contain a "mapper" or "bankswitch" capability which connects and disconnects different chips on the cartridge board to the console's memory space dynamically. This allows the game to have more data than will fit by breaking it down into chunks that are never loaded at the same time. However, this was much more common in 8-bit and 16-bit games since 32-bit games have a much larger address space available even on systems (including the GBA) which only wire up part of it. You may be interested in my <a href="https://cohost.org/0xabad1dea/post/556171-ro-ms-and-mappers-wh">high-level overview</a> of how mappers are used on the NES.</p>
 </div>
 <p>It is therefore necessary to divide Emerald up into sections – the read-only code and data, the fast variables, the slow variables, and the save file – and explicitly instruct the compiler on what goes where in the final ROM. This is accomplished through linker scripts. It is fortunately not necessary to understand every detail of linker script syntax for our purposes. The scripts are found in <a href="https://github.com/pret/pokeemerald/blob/master/ld_script.txt">ld_script.txt</a> and the files it includes by name.</p>
-<p>Notice that there are two versions of the linker script in the repository: one which makes sure everything is placed <em>exactly</em> in the same spot they ended up in the original ROM (<code>ld_script.txt</code>), and one for modern compilers which will find any new modules you've added and not be too particular about the exact order (<code>ld_script_modern.txt</code>). The latter is useful if you are making substantial changes to the game. We are examining the exact-reproduction version so that what we see in the script will correlate exactly to what we see in the game's memory in a live debugger. In general, the ordering of different pieces of data within the same linking section is due to the order they were added to the code base or the alphabetical order of the original source filenames, and not because they <em>must</em> be in that specific order. The naming conventions used in linker scripts are extremely archaic and non-obvious: <code>.text</code> means executable code, <code>.data</code> means global or static variables (those which always have a persistent value) and <code>.bss</code> means transient variables that pop in and out of existence when their functions run. <code>.rodata</code> is read-only data which is, at least, actually what it sounds like.</p>
+<p>Notice that there are two versions of the linker script in the repository: one which makes sure everything is placed <em>exactly</em> in the same spot they ended up in the original ROM (<code>ld_script.txt</code>), and one for modern compilers which will find any new modules you've added and not be too particular about the exact order (<code>ld_script_modern.txt</code>). The latter is useful if you are making substantial changes to the game. We are examining the exact-reproduction version so that what we see in the script will correlate exactly to what we see in the game's memory in a live debugger. In general, the ordering of different pieces of data within the same linking section is due to the order they were added to the code base or the alphabetical order of the original source filenames, and not because they <em>must</em> be in that specific order. The naming conventions used in linker scripts are extremely archaic and non-obvious: <code>.text</code> means executable code, <code>.data</code> means variables that always have a value and <code>.bss</code> means variables that do not always have a value. <code>.rodata</code> is read-only data which is, at least, actually what it sounds like.</p>
 <h2 id="memory-map-summary">Memory Map Summary</h2>
 <ul>
 <li>Read-Only BIOS (<code>0x00000000</code>)<ul>
@@ -194,7 +200,7 @@
 <li>Not explicitly listed in linker scripts nor physically present in the ROM file, but two copies of the save game (so that if one is corrupt, the other might still be loadable) are kept here. Most emulators will dump it to a <code>.sav</code> file on your computer.</li>
 </ul>
 <h2 id="rom-header">ROM header</h2>
-<p>The header must always be at <code>0x08000000</code> exactly so the BIOS boot function knows where to find it. It contains the game's name (<code>POKEMON EMER</code>), its assigned ID code (<code>BPEE</code>) and its assigned publisher code (<code>01</code>, which obviously stands for the most important publisher.) It also contains the address of the entry point which the BIOS should jump to after it's satisfied the cartridge is valid, and the CRC checksum that the BIOS will compare against after checksumming the cartridge itself to make that validity check. Since the CRC can only be calculated against a finished ROM, blank space is reserved during the compile process and a command-line utility is used to patch in the correct value at the end of compiling. You can see the reservation of space in the ROM for the header in <a href="https://github.com/pret/pokeemerald/blob/master/src/rom_header.s">rom_header.s</a>, though it's not very exciting, and the patching happens in the <a href="https://github.com/pret/pokeemerald/blob/master/Makefile">Makefile</a>.</p>
+<p>The header must always be at <code>0x08000000</code> exactly so the BIOS boot function knows where to find it. It contains the game's first executable instruction (which just jumps to the entry point), its name (<code>POKEMON EMER</code>), its assigned ID code (<code>BPEE</code>) and its assigned publisher code (<code>01</code>, which obviously stands for the most important publisher). It also contains the CRC checksum that the BIOS uses during its validity check to detect a corrupt cartridge. Since the CRC can only be calculated against a finished ROM, blank space is reserved during the compile process and a command-line utility is used to patch in the correct value at the end of compiling. You can see the reservation of space in the ROM for the header in <a href="https://github.com/pret/pokeemerald/blob/master/src/rom_header.s">rom_header.s</a>, though it's not very exciting, and the patching happens in the <a href="https://github.com/pret/pokeemerald/blob/master/Makefile">Makefile</a>.</p>
 <p>The header wastes 156 bytes on including the same corporate logo in every single cartridge of every single game for silly legal reasons. The game will not boot if the logo in the game does not exactly match the logo in the BIOS, and (or so the reasoning went) if you include a copy of the logo without buying a license to do so, then you are opening yourself up to being sued off the face of the earth. Everyone has ignored this for over twenty years. </p>
 <p>There is a second header, <code>GFRomHeader</code>, which is particular to this game engine. It enumerates where to find various information from the save file or about this particular version of the game so that a host application (such as Colosseum on GameCube) can safely extract them from the cartridge. It also serves as handy mini-documentation for what keyword to search to find many things you may have been curious about:</p>
 </li>
@@ -299,7 +305,8 @@ KAIWA_WORK_SIZE,
 // unknown 20
 static  const u8 IndexNull[ 0x100 - sizeof(POKEMON_ROM_HEADER)] = {}; 
 </code></pre>
-<p>Unknown 18 will take its secrets to the end of time, it seems. It's in a set of interoperability flags, but no name or explanation is given. Unknown 20 is not actually part of the structure in the original source code, but simply follows after it. It seems to be intended as padding to fill out 256 bytes, but its existence is pointless as the structure is 344 bytes. The ancient compiler the original team was using must have decided that an array with a negative length actually has a length of one rather than throwing an error which would have brought it to their attention as no longer needed.</p></div>
+<p>Unknown 18 will take its secrets to the end of time, it seems. It's in a set of interoperability flags, but no name or explanation is given. Unknown 20 is not actually part of the structure in the original source code, but simply follows after it. It was intended as padding to reserve a full 256 bytes, but its existence is pointless as the structure is 344 bytes. The ancient compiler the original team was using must have decided that an array with a negative length (256 - 344) actually has a length of one rather than throwing an error, which would have brought it to their attention as no longer needed.</p>
+<p>Continue on to <a href="../initmain/">Init and Main</a></p></div>
         
         
     </div>
@@ -327,7 +334,7 @@ static  const u8 IndexNull[ 0x100 - sizeof(POKEMON_ROM_HEADER)] = {};
     <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
         
                 <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
-                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/arm.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/armasm.min.js"></script>
         
     <script>hljs.initHighlightingOnLoad();</script>
     

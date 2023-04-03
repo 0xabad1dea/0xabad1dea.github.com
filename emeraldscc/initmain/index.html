@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A book that examines and explains the source code of Emerald, one of the most popular video games ever made, based on the decompilation work of PRET.">
+    <meta name="author" content="0xabad1dea">
+    <link rel="canonical" href="https://0xabad1dea.github.io/emeraldscc/initmain/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+
+    
+    <title>Init and Main - Emerald Source Code Commentary</title>
+    
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../css/override.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+     
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            
+              <a class="navbar-brand" href="..">Emerald Source Code Commentary</a>
+            
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Chapters <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="..">Introduction</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../layout/">Overall Structure and Layout</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Init and Main</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../about/">About</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fas fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../layout/">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../about/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#init-and-main">Init and Main</a></li>
+            <li class="second-level"><a href="#crt0s">crt0.s</a></li>
+                
+            <li class="second-level"><a href="#mainc">main.c</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="init-and-main">Init and Main</h1>
+<p>Everyone who has programmed in C/C++ or even been tangentially exposed to it knows about <code>main</code> – the special name reserved for the function that will first run when the program begins. This is, of course, perched on a throne of lies; it's not the first to run, it's just the first to run after some boring housekeeping stuff that is essentially identical in every program on a given platform and generally inserted automatically by the compiler. Of course, <em>we</em> are insisting on running bare-metal on a tiny toy for children and so <em>we</em> get to manually include our own pre-<code>main</code> initialization steps.</p>
+<p>As mentioned previously, the ROM header contains the first instruction of the game at <code>0x08000000</code>, which we can <a href="https://github.com/pret/pokeemerald/blob/master/src/rom_header.s">see</a> is <code>b Init</code>, where <code>b</code>(ranch) is equivalent to <code>goto</code>. The <code>Init</code> function is located in <a href="https://github.com/pret/pokeemerald/blob/master/src/crt0.s">crt0.s</a> which is simply a conventionalized name for the code that initializes the C runtime. It is written in assembly because it needs to interface directly with the specific hardware at hand in a way that cannot be expressed at the C abstraction level. If you want to look up more about any of the opcodes, keep in mind that the GBA is a 32-bit ARM architecture with THUMB support, not an x86 one.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>32-bit ARM processors can run in two distinct modes, dubbed ARM and THUMB, and switch between them on a function-by-function basis. ARM opcodes are four bytes each and THUMB opcodes are two bytes each, and hence can encode less information per operation but in many cases will make the function much smaller overall for the purposes of reducing ROM size. The switching modes is done with a clever trick: since opcodes are always aligned in memory (starting on a multiple of 4 or 2 depending on their size), there's no such thing as an instruction that starts at an odd address. Hence, the smallest bit of an address can be used as a flag to indicate THUMB mode. If the CPU attempts to branch to an odd-numbered address, it switches to THUMB mode and subtracts one from the address before branching. When it branches to an even one, it switches to ARM mode.</p>
+</div>
+<h3 id="crt0s"><a href="https://github.com/pret/pokeemerald/blob/master/src/crt0.s">crt0.s</a></h3>
+<pre><code class="language-armasm">Init::
+    mov r0, #PSR_IRQ_MODE
+    msr cpsr_cf, r0
+    ldr sp, sp_irq
+    mov r0, #PSR_SYS_MODE
+    msr cpsr_cf, r0
+    ldr sp, sp_sys
+    ldr r1, =INTR_VECTOR
+    adr r0, IntrMain
+    str r0, [r1]
+    .if MODERN
+    mov r0, #255 @ RESET_ALL
+    svc #1 &lt;&lt; 16
+    .endif @ MODERN
+    ldr r1, =AgbMain + 1
+    mov lr, pc
+    bx r1
+    b Init
+</code></pre>
+<p><em>Do not panic if this is completely incomprehensible. The vast majority of the game is written in C.</em></p>
+<p>This code relies heavily on writing magic numbers to <a href="https://developer.arm.com/documentation/ddi0406/b/System-Level-Architecture/The-System-Level-Programmers--Model/ARM-processor-modes-and-core-registers/Program-Status-Registers--PSRs-">magic registers</a> that can only be understood with manufacturer documentation. It first initializes the IRQ (interrupt request) stack at the very end of fast RAM, reserving a small amount of space for the hardware to store information about events the game will want to process. It then initializes the system stack for the arguments of functions, also in fast RAM (IWRAM). Within a specific slot of the IRQ stack we just set up, specifically <code>INTR_VECTOR</code> == <code>0x3007FFC</code>, we store the address of the function <code>IntrMain</code> so it can be called to process interrupts. </p>
+<p>The <code>.if MODERN</code> brackets our first optional deviation from the original game, although it's just moving the operation from immediately after <code>AgbMain</code> begins to immediately before it to keep compilers happy. The <code>svc</code> or supervisor call instruction is an alternate name for the <code>swi</code> or software interrupt instruction which will call into the utility functions stored in the BIOS. Due to Reasons, the index number of the requested interrupt needs to be different depending on whether the CPU is currently in ARM or THUMB mode. Since we are in ARM mode, we need to take the index we want and shift it by 16. BIOS function #1 is <code>RegisterRamReset</code>(reminder: <a href="https://problemkaputt.de/gbatek.htm#biosfunctions">documentation</a>) and we are calling it with an argument of <code>RESET_ALL</code>, meaning all registers and RAM (except for a small carve-out for the IRQ area, which it knows to leave alone) will be set to a clean state of 0. While a game may seem to work fine without doing this, it is a very good idea to always reset memory to a known state. On real hardware, the RAM and registers will power on with random values due to electrical noise. This can lead to random bugs that cannot be reproduced at will. (Emulators usually clean the pretend RAM and registers before emulation begins, but they are not required to do so.)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A real-world example of a bug introduced by not clearing RAM can see seen in <a href="https://tcrf.net/Notes:Super_Mario_All-Stars">Super Mario All-Stars</a>. If a certain byte in RAM happened to randomly settle to <code>0x80</code> when the Super Nintendo was powered on, the game would mistakenly believe it was a developer system and enable debug mode. Since this randomization is determined by the physical environment, some Super Nintendos were more prone to initializing in that exact way than others, and hence some people seemingly had a "debug copy" of the game.</p>
+</div>
+<p>Finally, the address of <code>AGBMain</code> is loaded (consult the note above on THUMB for why we add 1) and called. If <code>AGBMain</code> ever returns (it shouldn't!) then the last instruction of <code>Init</code> will loop back to the first. Otherwise, since there is no other layer underneath to return to, execution would simply proceed to whatever happened to be next in memory – which in this case is some constants referenced by <code>Init</code> which aren't meant to be executed as instructions.</p>
+<p><code>IntrMain</code>, which was installed by <code>Init</code> as the interrupt handler, mostly consists of an if-cascade that checks for each interrupt flag one at a time, incrementing an index in <code>r12</code> as it goes. The bit that actually makes things happen is small:</p>
+<pre><code class="language-armasm">ldr r1, =gIntrTable
+add r1, r1, r12
+ldr r0, [r1]
+stmfd sp!, {lr}
+adr lr, IntrMain_RetAddr
+bx r0
+</code></pre>
+<p>This simply indexes into <code>gIntrTable</code>, which will be set up later, and calls whatever function it finds there. Note that interrupts are not yet enabled as of the moment we are stepping into <code>AgbMain</code> and hence there's no danger of <code>IntrMain</code> being called before the table is filled out.</p>
+<p>That's it – that's every bit of secret pre-<code>main</code> initialization starting from the cartridge's first instruction. We may now progress to <em>the master game loop.</em></p>
+<h3 id="mainc"><a href="https://github.com/pret/pokeemerald/blob/master/src/main.c">main.c</a></h3>
+<p>Just as a curiosity, we can see the exact moment that the final build of the English edition of Emerald was compiled:</p>
+<pre><code class="language-c">const char BuildDateTime[] = &quot;2005 02 21 11:10&quot;;
+</code></pre>
+<p>Note that's a few months before the game went on sale; physical cartridges have a lot of lead time. Clearly, this time stamp was patched in by the build tools rather than manually typed into the original source code. (Specifically, a header file containing nothing but the current timestamp was generated at each compile time by the Makefile.) It's preserved here exactly as it was so that the ROM can be recompiled back to the same state. Another curiosity is that the leaked source dump has a timestamp of <code>"2005 06 14 15:20"</code>, so it appears to be a backup made while preparing the European release that launched in October. The final Spanish ROM's timestamp is two weeks later: <code>"2005 07 01 18:30"</code>. (Almost all such leaks come from third party localizers who needed the ability to edit the source code directly. The disks they were mailed kick around in someone's garage until someone else who never signed a contract with the publisher finds them.)</p>
+<p>In <code>IntrMain</code> we saw an interrupt table which had not yet been initialized. Its default state is encoded here, with many of the entries set to a dummy placeholder as they'll be swapped out dynamically:</p>
+<pre><code class="language-c">const IntrFunc gIntrTableTemplate[] =
+{
+    VCountIntr, // V-count interrupt
+    SerialIntr, // Serial interrupt
+    Timer3Intr, // Timer 3 interrupt
+    HBlankIntr, // H-blank interrupt
+    VBlankIntr, // V-blank interrupt
+    IntrDummy,  // Timer 0 interrupt
+    IntrDummy,  // Timer 1 interrupt
+    IntrDummy,  // Timer 2 interrupt
+    IntrDummy,  // DMA 0 interrupt
+    IntrDummy,  // DMA 1 interrupt
+    IntrDummy,  // DMA 2 interrupt
+    IntrDummy,  // DMA 3 interrupt
+    IntrDummy,  // Key interrupt
+    IntrDummy,  // Game Pak interrupt
+};
+</code></pre>
+<p>Next are a messy set of miscellaneous globals for tracking game state:</p>
+<pre><code class="language-c">static u16 sUnusedVar; // Never read
+
+u16 gKeyRepeatStartDelay;
+bool8 gLinkTransferringData;
+struct Main gMain;
+u16 gKeyRepeatContinueDelay;
+bool8 gSoftResetDisabled;
+IntrFunc gIntrTable[INTR_COUNT];
+u8 gLinkVSyncDisabled;
+u32 IntrMain_Buffer[0x200];
+s8 gPcmDmaCounter;
+
+static EWRAM_DATA u16 sTrainerId = 0;
+</code></pre>
+<p>The one marked unused is named <code>mssize</code> in the original code and is set to the <code>sizeof()</code> of a structure used for multiplayer on the serial cable. It's presumably vestigial from early scaffolding.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>2023 0xabad1dea</small><br>
+            
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/armasm.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = ".."</script>
+    
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

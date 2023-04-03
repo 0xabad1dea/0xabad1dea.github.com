@@ -92,6 +92,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="initmain/">Init and Main</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -148,7 +154,7 @@
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This book will occasionally cite small amounts of the original copyrighted source code. This is a courtesy notice to anyone obligated to maintain a clean-room status.</p>
+<p>This book will occasionally cite small amounts of the original commercial source code. This is a courtesy notice to anyone obligated to maintain a clean-room status.</p>
 </div>
 <h2 id="introduction">Introduction</h2>
 <p>Video games are a crucial component of modern art and culture. They deserve to be preserved, they deserve to be accessible, and they deserve to be studied.</p>
@@ -171,17 +177,13 @@
 <p>Released in 2004, Emerald rests at the balance point between small games written entirely in assembly and the modern AAA behemoth. At the ancient end, one spends too much time keeping mental track of registers and status flags to perceive the game; at the other extreme, the code in its totality (to include all the underlying drivers and libraries) is so large that not one single person actually does understand all of it. There is nothing running underneath a GameBoy Advance game. The hardware only runs a boot routine to display the logo and check that the cartridge appears to be valid before jumping to its entry point, at which point the game has absolute control. The BIOS burned into the hardware also contains some utility functions that it was expected almost every game would need; they are <a href="https://problemkaputt.de/gbatek.htm#biosfunctions">well-documented</a>. Absolutely everything else needed to run the game is inside the game itself.</p>
 <p>It is recommended to check out a <a href="https://www.copetti.org/writings/consoles/game-boy-advance/">general overview</a> of GBA hardware capabilities. The <a href="https://problemkaputt.de/gbatek.htm">GBATEK</a> document contains the nittiest of grit.</p>
 <h2 id="decompiliation">Decompiliation</h2>
-<p>It may be surprising to see a commentary on the source code of a closed-source commercial game, especially from such a notoriously jealous and vengeful company. It so happens that the real, full original source code of Emerald <em>is</em> available on the internet. It's stolen, obviously. Aside from that, there are a few reasons to hesitate from referencing it heavily: the leaked version is for the Japanese edition of the game without the English translation, the comments are in Japanese and in a pre-Unicode encoding that will not render correctly in modern editors, and the variables (which in C must always be in ascii) are written in improvised wasei-eigo indecipherable to anyone but the original programmers:</p>
-<pre><code class="language-c">//----------------------------------------------------------
-//  �{�[���̱���No���ްق�ð���No�ɕϊ�����
-//----------------------------------------------------------
-
-case ITEM_GOOZYASUBOORU:
+<p>It may be surprising to see a commentary on the source code of a closed-source commercial game, especially from such a notoriously jealous and vengeful company. It so happens that the real, full original source code of Emerald <em>is</em> available on the internet. It's... unauthorized, obviously. Aside from that, there are a few reasons to hesitate from referencing it heavily: some of the functionality is unlocalized, the comments are in Japanese and in a pre-Unicode encoding that will not render correctly in modern editors, the way in-game text is represented is a <em>nightmare</em> and the variables (which in C must always be in ascii) are written in improvised wasei-eigo indecipherable to anyone but the original programmers:</p>
+<pre><code class="language-c">case ITEM_GOOZYASUBOORU:
         tblno = EF_GOUJYASU_BALL;
         break;
 </code></pre>
 <p><em>(Note the two wildly different spellings of the same item name.)</em></p>
-<p>Therefore, this commentary is built on the stellar work of PRET (Pokemon Reverse Engineering Team) to produce a new body of decompiled source code that compiles exactly to the official English release of the Emerald ROM down to the last byte. You can <a href="https://github.com/pret/pokeemerald">browse the code base</a>, download your own copy, compile it, and freely make changes. The comments and variable names follow English coding conventions. Reverse engineering the game to this level of perfection was an <em>enormous</em> amount of work and it was not done by the author of the Commentary. Please check the <a href="https://github.com/pret/pokeemerald/graphs/contributors">contributors</a> page for more information.</p>
+<p>Therefore, this commentary is built on the stellar work of PRET (Pokemon Reverse Engineering Tools) to produce a new body of decompiled source code that compiles exactly to the official English release of the Emerald ROM down to the last byte. You can <a href="https://github.com/pret/pokeemerald">browse the code base</a>, download your own copy, compile it, and freely make changes. The comments and variable names follow English coding conventions. Reverse engineering the game to this level of perfection was an <em>enormous</em> amount of work and it was not done by the author of the Commentary. Please check the <a href="https://github.com/pret/pokeemerald/graphs/contributors">contributors</a> page for more information.</p>
 <p>Due to ongoing improvements in matters such as variable names and file structure, the current state of the PRET repository may not be identical to the code as quoted in the Commentary. However, since it is a round-trip decompiliation (that is, it recompiles to its exact original state), the code as a whole will always be functionally identical.</p>
 <p>Since the decomp is based on the commercial release, all the debug tooling present in beta builds of the game is absent. Check <a href="https://tcrf.net/Proto:Pok%C3%A9mon_Emerald">The Cutting Room Floor</a> for information on the Japanese-only debug tooling present in the leaked original source code. You can also consult the debug functionality present in <a href="https://github.com/pret/pokeruby/tree/master/src/debug">Ruby/Sapphire</a>.</p>
 <p>Like all Pokemon games, Emerald is riddled with bugs. In addition to reproducing the original ROM, the PRET code base also supports alternate compilation settings to fix logic bugs and avoid undefined behavior that angers a modern, more standards-compliant compiler. You will see these optional code snippets inside <code>#IFDEF</code> blocks.</p>
@@ -213,7 +215,7 @@ case ITEM_GOOZYASUBOORU:
     <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
         
                 <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
-                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/arm.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/armasm.min.js"></script>
         
     <script>hljs.initHighlightingOnLoad();</script>
     
