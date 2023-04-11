@@ -195,7 +195,7 @@ bx r0
 <pre><code class="language-c">const char BuildDateTime[] = &quot;2005 02 21 11:10&quot;;
 </code></pre>
 <p>Note that's a few months before the game went on sale; physical cartridges have a lot of lead time. Clearly, this time stamp was patched in by the build tools rather than manually typed into the original source code. (Specifically, a header file containing nothing but the current timestamp was generated at each compile time by the Makefile.) It's preserved here exactly as it was so that the ROM can be recompiled back to the same state. Another curiosity is that the leaked source dump has a timestamp of <code>"2005 06 14 15:20"</code>, so it appears to be a backup made while preparing the European release that launched in October. The final Spanish ROM's timestamp is two weeks later: <code>"2005 07 01 18:30"</code>. (Almost all such leaks come from third party localizers who needed the ability to edit the source code directly. The disks they were mailed kick around in someone's garage until someone else who never signed a contract with the publisher finds them.)</p>
-<p>In <code>IntrMain</code> we saw an interrupt table which had not yet been initialized. Its default state is encoded here, with many of the entries set to a dummy placeholder as they'll be swapped out dynamically:</p>
+<p>In <code>IntrMain</code> we saw an interrupt table which had not yet been initialized. Its default state is encoded here, with many of the entries set to a dummy placeholder as the game does not actually care about them:</p>
 <pre><code class="language-c">const IntrFunc gIntrTableTemplate[] =
 {
     VCountIntr, // V-count interrupt
@@ -214,6 +214,10 @@ bx r0
     IntrDummy,  // Game Pak interrupt
 };
 </code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>HBlank and VBlank are terms dating from the CRT television era. The pixels of the screen are updated left-to-right and top-to-bottom each frame. The horizontal blank interrupt activates each time the end of a row of pixels is reached (hence 160x per frame) and the vertical blank interrupt activates each time the end of rendering is reached and the screen will return to the first pixel in the upper left (hence definitionally once per frame, very slightly faster than 60x per second). This lets the game know when it's time to update the visuals that will be rendered to the screen. It is the responsibility of the programmer to keep the handlers for these interrupts as short as possible; it would be very bad if VBlank activated while only halfway through processing the previous VBlank! </p>
+</div>
 <p>Next are a messy set of miscellaneous globals for tracking game state:</p>
 <pre><code class="language-c">static u16 sUnusedVar; // Never read
 
@@ -229,7 +233,206 @@ s8 gPcmDmaCounter;
 
 static EWRAM_DATA u16 sTrainerId = 0;
 </code></pre>
-<p>The one marked unused is named <code>mssize</code> in the original code and is set to the <code>sizeof()</code> of a structure used for multiplayer on the serial cable. It's presumably vestigial from early scaffolding.</p></div>
+<p>The one marked unused is named <code>mssize</code> in the original code and is set to the <code>sizeof()</code> of a structure used for multiplayer on the serial cable. It's presumably vestigial from early scaffolding. The <code>gMain</code> structure is defined in <a href="https://github.com/pret/pokeemerald/blob/master/include/main.h">main.h</a> and bundles together several things that are constantly relevant in every phase of the game:</p>
+<pre><code class="language-c">struct Main
+{
+    /*0x000*/ MainCallback callback1;
+    /*0x004*/ MainCallback callback2;
+
+    /*0x008*/ MainCallback savedCallback;
+
+    /*0x00C*/ IntrCallback vblankCallback;
+    /*0x010*/ IntrCallback hblankCallback;
+    /*0x014*/ IntrCallback vcountCallback;
+    /*0x018*/ IntrCallback serialCallback;
+
+    /*0x01C*/ vu16 intrCheck;
+
+    /*0x020*/ u32 vblankCounter1;
+    /*0x024*/ u32 vblankCounter2;
+
+    /*0x028*/ u16 heldKeysRaw;           // held keys without L=A remapping
+    /*0x02A*/ u16 newKeysRaw;            // newly pressed keys without L=A remapping
+    /*0x02C*/ u16 heldKeys;              // held keys with L=A remapping
+    /*0x02E*/ u16 newKeys;               // newly pressed keys with L=A remapping
+    /*0x030*/ u16 newAndRepeatedKeys;    // newly pressed keys plus key repeat
+    /*0x032*/ u16 keyRepeatCounter;      // counts down to 0, triggering key repeat
+    /*0x034*/ bool16 watchedKeysPressed; // whether one of the watched keys was pressed
+    /*0x036*/ u16 watchedKeysMask;       // bit mask for watched keys
+
+    /*0x038*/ struct OamData oamBuffer[128];
+
+    /*0x438*/ u8 state;
+
+    /*0x439*/ u8 oamLoadDisabled:1;
+    /*0x439*/ u8 inBattle:1;
+    /*0x439*/ u8 anyLinkBattlerHasFrontierPass:1;
+};
+</code></pre>
+<p>Zoom. Enhance.</p>
+<pre><code class="language-c">u8 state;
+</code></pre>
+<p>This is a <em>load-bearing byte.</em></p>
+<p><code>gMain.state</code> is the master state machine tracker value. It's updated in over 500 locations across several dozen source files. Each distinct type of screen (title screen, evolution screen, etc) uses it to keep track of where it is in its sequence of possible events. The meaning of each possible value is specific to each screen. In a hypothetically perfect engine each game mode should track its state independently, but memory is tight and it's not possible for more than one to be running concurrently. </p>
+<p>The actual main function is pretty concise, and on a first reading you will almost certainly miss where the actual <em>game</em> happens:</p>
+<pre><code class="language-c">void AgbMain()
+{
+    // Modern compilers are liberal with the stack on entry to this function,
+    // so RegisterRamReset may crash if it resets IWRAM.
+#if !MODERN
+    RegisterRamReset(RESET_ALL);
+#endif //MODERN
+    *(vu16 *)BG_PLTT = RGB_WHITE; // Set the backdrop to white on startup
+    InitGpuRegManager();
+    REG_WAITCNT = WAITCNT_PREFETCH_ENABLE | WAITCNT_WS0_S_1 | WAITCNT_WS0_N_3;
+    InitKeys();
+    InitIntrHandlers();
+    m4aSoundInit();
+    EnableVCountIntrAtLine150();
+    InitRFU();
+    RtcInit();
+    CheckForFlashMemory();
+    InitMainCallbacks();
+    InitMapMusic();
+#ifdef BUGFIX
+    SeedRngWithRtc(); // see comment at SeedRngWithRtc definition below
+#endif
+    ClearDma3Requests();
+    ResetBgs();
+    SetDefaultFontsPointer();
+    InitHeap(gHeap, HEAP_SIZE);
+
+    gSoftResetDisabled = FALSE;
+
+    if (gFlashMemoryPresent != TRUE)
+        SetMainCallback2(NULL);
+
+    gLinkTransferringData = FALSE;
+    sUnusedVar = 0xFC0;
+
+#ifndef NDEBUG
+#if (LOG_HANDLER == LOG_HANDLER_MGBA_PRINT)
+    (void) MgbaOpen();
+#elif (LOG_HANDLER == LOG_HANDLER_AGB_PRINT)
+    AGBPrintfInit();
+#endif
+#endif
+    for (;;)
+    {
+        ReadKeys();
+
+        if (gSoftResetDisabled == FALSE
+         &amp;&amp; JOY_HELD_RAW(A_BUTTON)
+         &amp;&amp; JOY_HELD_RAW(B_START_SELECT) == B_START_SELECT)
+        {
+            rfu_REQ_stopMode();
+            rfu_waitREQComplete();
+            DoSoftReset();
+        }
+
+        if (Overworld_SendKeysToLinkIsRunning() == TRUE)
+        {
+            gLinkTransferringData = TRUE;
+            UpdateLinkAndCallCallbacks();
+            gLinkTransferringData = FALSE;
+        }
+        else
+        {
+            gLinkTransferringData = FALSE;
+            UpdateLinkAndCallCallbacks();
+
+            if (Overworld_RecvKeysFromLinkIsRunning() == TRUE)
+            {
+                gMain.newKeys = 0;
+                ClearSpriteCopyRequests();
+                gLinkTransferringData = TRUE;
+                UpdateLinkAndCallCallbacks();
+                gLinkTransferringData = FALSE;
+            }
+        }
+
+        PlayTimeCounter_Update();
+        MapMusicMain();
+        WaitForVBlank();
+    }
+}
+</code></pre>
+<p>Did you spot it? The game happens inside <code>UpdateLinkAndCallCallbacks()</code>. A callback is when a function's address is stored in a variable by one piece of code so that another piece of code will later call it without necessarily knowing or caring exactly what it will do. Various pieces of game logic will stash functions in the callback variables (we saw them in the <code>gMain</code> struct) for <code>AgbMain</code> to call on its next loop and keep the game moving. The very first callbacks are initialized in the helper function <code>InitMainCallbacks()</code> – technically only one is set, <code>CB2_InitCopyrightScreenAfterBootup()</code>. We will check it out later.</p>
+<p>If you browse the various helper functions called in the initialization stage of the main function, you will see something that is traditionally a no-no in application programming – writing directly to a specific hard-coded address:</p>
+<pre><code class="language-c">void StartTimer1(void)
+{
+    REG_TM1CNT_H = 0x80;
+}
+</code></pre>
+<p>(Where <code>REG_TM1CNT_H</code> == <code>0x04000106</code> after chasing it down through multiple layers of defines.) When working directly with the real, unprotected memory space of a device, it is typical for specific addresses to be physically wired to hardware components for the purpose of interacting with them. These addresses are unique to every kind of device and must be looked up in <a href="https://problemkaputt.de/gbatek.htm#gbatimers">documentation</a>. This address is connected to "Timer 1 Control", and by setting it to <code>0x80</code> (better understood as <code>0b10000000</code> since it is a set of bit flags) the timer is enabled and starts ticking.</p>
+<p>There's actually a very serious bug in <code>AgbMain()</code>, one which has a huge impact on advanced gameplay such as speedrunning and shiny hunting: <em>they forgot to seed the RNG.</em> They straight-up forgot! In Ruby/Sapphire, there is a call to <code>SeedRngWithRtc()</code> following <code>InitMapMusic()</code>:</p>
+<pre><code class="language-c">static void SeedRngWithRtc(void)
+{
+    u32 seed = RtcGetMinuteCount();
+    seed = (seed &gt;&gt; 16) ^ (seed &amp; 0xFFFF);
+    SeedRng(seed);
+}
+</code></pre>
+<p>This means there are thousands of different RNG streams from power-on depending on what value was pulled from the real-time clock, which keeps running when the game is off. This code was removed for Fire Red/Leaf Green as these were ports of older games with no RTC. When they sat down to hack together Emerald, it seems the team used the version of <code>AgbMain</code> they had made for FRLG rather than RS. They forgot to restore the RNG initialization, and so now every legitimate copy of Emerald is stuck booting with an RNG value of <code>0x0000</code>. The PRET decompiliation will include <code>SeedRngWithRtc()</code> at the correct place if <code>BUGFIX</code> compile mode is enabled, which allows you to experience an alternate reality where randomness is slightly more actually random. This is a <em>classic</em> Game Freak bug: understandable how it happened, but a solid gameplay testing process should have caught it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>RNG (random number generation) can only be "truly" random if it is reading from a physical random process such as radioactive decay. Algorithms that can run quickly on something like a Game Boy Advance are a very rough approximation, and require a kick-off random number, the "seed", so that they do not simply produce the same sequence each time the game is run. While a linearly increasing clock is not very random at all, the exact value at whatever time you happen to turn on the game might as well be for basic seeding purposes. The seed being stuck at zero after every reboot in Emerald means that the exact same series of player inputs will always result in the same series of events such as wild encounters, critical hits, capture successes, and what stats are assigned to newly captured mons. Fortunately, normal players are divergent enough in their inputs that the broken RNG is not too wildly obvious. (Shiny hunters are Not Normal.)</p>
+</div>
+<p>There is another bug just in the functions called directly from <code>AgbMain</code>: if the option is set to treat the "L" button as equivalent to the "A" button, <code>ReadKeys()</code> won't correctly do key repeat for the "L" as an "A". Another bug that should have been found in testing, and this one is an original sin of Ruby/Sapphire.</p>
+<p>Ignoring complications introduced by whether or not the link cable is active, the structure of the infinite game loop is straightforward:</p>
+<ul>
+<li>Check which buttons are pressed on the controller;</li>
+<li>Check whether it's time to do a soft reset; </li>
+<li>Call the currently registered callbacks, which contain the game logic;</li>
+<li>Update how long the game has been running;</li>
+<li>Do some bookkeeping with the music;</li>
+<li>Wait for the end of the VBlank interrupt which signals the end of the frame.</li>
+</ul>
+<p>The last step keeps everything synchronized by ensuring everything happens once per 60th of a second. If too much work is done in a callback to meet the frame deadline, it can cause audio-visual issues.</p>
+<p>The last thing we'll go over in <code>main.c</code> is the VBlank interrupt handler:</p>
+<pre><code class="language-c">static void VBlankIntr(void)
+{
+    if (gWirelessCommType != 0)
+        RfuVSync();
+    else if (gLinkVSyncDisabled == FALSE)
+        LinkVSync();
+
+    gMain.vblankCounter1++;
+
+    if (gTrainerHillVBlankCounter &amp;&amp; *gTrainerHillVBlankCounter &lt; 0xFFFFFFFF)
+        (*gTrainerHillVBlankCounter)++;
+
+    if (gMain.vblankCallback)
+        gMain.vblankCallback();
+
+    gMain.vblankCounter2++;
+
+    CopyBufferedValuesToGpuRegs();
+    ProcessDma3Requests();
+
+    gPcmDmaCounter = gSoundInfo.pcmDmaCounter;
+
+    m4aSoundMain();
+    TryReceiveLinkBattleData();
+
+    if (!gMain.inBattle || !(gBattleTypeFlags &amp; (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_RECORDED)))
+        Random();
+
+    UpdateWirelessStatusIndicatorSprite();
+
+    INTR_CHECK |= INTR_FLAG_VBLANK;
+    gMain.intrCheck |= INTR_FLAG_VBLANK;
+}
+</code></pre>
+<p>The main steps are:</p>
+<ul>
+<li>Call the VBLank callback if one is registered;</li>
+<li>Push pending graphics changes to the video memory;</li>
+<li>Process this frame's audio;</li>
+<li>Advance the RNG;</li>
+<li>Set the flag that <code>AgbMain()</code> waits on each loop.</li>
+</ul>
+<p>You've likely noticed that special carve-outs for link cable transmissions are scattered around randomly. VBlank also handles displaying an activity indicator for the <a href="https://bulbapedia.bulbagarden.net/wiki/Game_Boy_Advance_Wireless_Adapter">wireless adapter</a> that I, as someone who was definitely alive at the time, have no recollection about whatsoever but allegedly is a real thing that exists. Finally, they've shoehorned a timer that's only relevant to the Trainer Hill challenge into every single VBlank. </p></div>
         
         
     </div>

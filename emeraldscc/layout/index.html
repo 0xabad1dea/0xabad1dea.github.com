@@ -142,6 +142,8 @@
             <li class="second-level"><a href="#rom-header">ROM header</a></li>
                 
                 <li class="third-level"><a href="#rom_header_gfc">rom_header_gf.c</a></li>
+            <li class="second-level"><a href="#source-directory-layout">Source Directory Layout</a></li>
+                
     </ul>
 </div></div>
         <div class="col-md-9" role="main">
@@ -306,6 +308,9 @@ KAIWA_WORK_SIZE,
 static  const u8 IndexNull[ 0x100 - sizeof(POKEMON_ROM_HEADER)] = {}; 
 </code></pre>
 <p>Unknown 18 will take its secrets to the end of time, it seems. It's in a set of interoperability flags, but no name or explanation is given. Unknown 20 is not actually part of the structure in the original source code, but simply follows after it. It was intended as padding to reserve a full 256 bytes, but its existence is pointless as the structure is 344 bytes. The ancient compiler the original team was using must have decided that an array with a negative length (256 - 344) actually has a length of one rather than throwing an error, which would have brought it to their attention as no longer needed.</p>
+<h2 id="source-directory-layout">Source Directory Layout</h2>
+<p>Most of the C source files that make up the bulk of the engine are in <code>src/</code> but there are a few outside of it (<code>gflib/</code>) and assembly source files (<code>.s</code>) are scattered across several folders. <code>asm/</code> contains macro definitions for the scripting engine; <code>data/</code> contains an enormous amount of assorted high-level game data such as event scripts, in-game text, tilesets and maps; <code>graphics/</code> contains visuals other than tilesets; <code>include/</code> is C headers; <code>sound/</code> includes songs and sound effects; <code>tools/</code> contains utilities used in the build process that are not part of the game itself. Here you will find the scripts that convert the easily-editable forms of images and music stored in the repo to the formats expected by the game and <code>gbafix</code> which patches the final CRC into the header.</p>
+<p>If you add new data resources to the game, you will likely need to wade into <code>src/data/</code> and find the right header to patch to actually incorporate it into the ROM by name. </p>
 <p>Continue on to <a href="../initmain/">Init and Main</a></p></div>
         
         
