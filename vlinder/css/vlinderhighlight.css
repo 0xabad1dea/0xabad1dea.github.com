@@ -1,0 +1,138 @@
+/*
+Vlinder theme: 0xabad1dea 2023
+MIT licence
+*/
+
+@font-face {
+  font-family: 'Victor Mono'; 
+  src:  url('../fonts/VictorMono-SemiBold.otf') format('opentype');
+  font-feature-settings: "tnum" on;
+  }
+@font-face {
+  font-family: 'Victor Mono Italic'; 
+  src:  url('../fonts/VictorMono-SemiBoldItalic.otf') format('opentype');
+  font-feature-settings: "tnum" on;
+  }
+@font-face {
+      font-family: 'Victor Mono Bold'; 
+      src:  url('../fonts/VictorMono-Bold.otf') format('opentype');
+      font-feature-settings: "swsh" on;
+      }
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #333;
+  background: #FCFDFF;
+  font-family:"Victor Mono", monospace;
+  font-size:16px;
+  line-height:1.2;
+  border: 1px solid;
+  border-left: 5px solid;
+  border-image: linear-gradient(to bottom, #3481A4, #43BBAD) 1;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #3481A4;
+  font-family:"Victor Mono Italic", monospace;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #52127C;
+  font-weight: bold;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  font-family:"Victor Mono Bold", monospace;
+  font-weight:bold;
+  color: #3481A4;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #B53679;
+  font-family:"Victor Mono Italic", monospace;
+  font-style: italic;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #B53679;
+  font-weight: bold;
+}
+
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #52127C;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #52127C;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #43BBAD;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #B53679;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #3481A4;
+}
+
+.hljs-meta {
+  color: #3481A4;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.hljs-emphasis {
+  font-family:"Victor Mono Italic", monospace;
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-family:"Victor Mono Bold", monospace;
+  font-weight: bold;
+}
+
+@media print {
+.hljs {
+  border-image:none!important;
+  border-color:black!important;
+}
+
+  .hljs, .hljs * {
+    color: black!important;
+  }
+}

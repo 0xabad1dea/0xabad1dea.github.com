@@ -1,0 +1,322 @@
+/*
+    ~Vlinder Academia~ Theme for MkDocs | by 0xabad1dea 2023 | MIT Licence
+
+    forked from:
+    Cinder Theme for MkDocs | Copyright 2015 Christopher Simpkins | MIT License
+*/
+
+@font-face {
+    font-family: 'EB Garamond'; 
+    src:  url('../fonts/EBGaramond-VariableFont_wght.ttf') format('truetype');
+    font-feature-settings: "tnum" on;
+    }
+@font-face {
+    font-family: 'EB Garamond Italic'; 
+    src:  url('../fonts/EBGaramond-Italic-VariableFont_wght.ttf') format('truetype');
+    font-feature-settings: "tnum" on;
+    }
+@font-face {
+    font-family: 'EB Garamond Swish'; 
+    src:  url('../fonts/EBGaramond-Italic-VariableFont_wght.ttf') format('truetype');
+    font-feature-settings: "swsh" on;
+    }
+@font-face {
+    font-family: 'Victor Mono'; 
+    src:  url('../fonts/VictorMono-SemiBold.otf') format('opentype');
+    font-feature-settings: "tnum" on;
+    }
+
+
+body {
+    font-family:"EB Garamond", "Garamond", "SimSun Regular", "Songti SC", serif;
+    font-size: 24px;
+    line-height: 1.5;
+    background-color: #FFF;
+    color: #343838;
+    text-align:justify;
+    letter-spacing:1px;
+    quotes: "“" "”" "‘" "’";
+}
+h1, h2, h3, h4, h6 {
+    font-family:"EB Garamond", serif;
+    color: #222;
+    margin-bottom:32px;
+    margin-top: 21px;
+}
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small, .h1 small, .h2 small, .h3 small, .h4 small, .h5 small, .h6 small, h1 .small, h2 .small, h3 .small, h4 .small, h5 .small, h6 .small, .h1 .small, .h2 .small, .h3 .small, .h4 .small, .h5 .small, .h6 .small {
+    color: #B1B7B9;
+}
+
+h1 {
+    font-size:48px;
+    font-weight:900;
+    font-style:bold;
+}
+
+h1::before {
+    content:"🙞"
+}
+
+h1::after {
+    content:"🙜"
+}
+
+h2::before {
+    content:"🙤"
+}
+
+h2::after {
+    content:"🙦"
+}
+
+h2 {
+    font-weight: 700;
+    font-size:40px;
+    margin-top: 32px;
+}
+
+h1, h2 {
+    letter-spacing:8px;
+    border-bottom:solid 2px;
+    text-align:center;
+    padding-bottom:8px;
+    background:linear-gradient(to right, #3481A4, #43BBAD);
+    border-image: linear-gradient(to right, #3481A4, #43BBAD) 1;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color:transparent;
+
+}
+
+@media print {
+    h1, h2 {
+    color: #000!important;
+    text-shadow: none!important;
+    background: revert!important;
+    box-shadow: none!important;
+    -webkit-background-clip: revert!important;
+    background-clip: revert!important;
+    -webkit-text-fill-color:revert!important;
+    border-image:revert!important;
+    border-bottom:#222 solid 2px;
+    }
+}
+
+h3 {
+    font-size:36px;
+}
+h4 {
+    font-family:"EB Garamond Italic", "Garamond", serif;
+    font-weight: 300;
+    margin-top: 20px;
+    font-style: italic;
+    font-size:32px;
+}
+h5 {
+    font-family:"EB Garamond", "Garamond", serif;
+    font-weight: 300;
+    font-variant: small-caps;
+    font-size:30px;
+}
+
+blockquote p {
+    font-family:"EB Garamond", "Garamond", serif;
+    font-size: 24px;
+    line-height: 1.5;
+    background-color: #FFF;
+    color: #343838;
+    text-align:justify;
+    letter-spacing:1px;
+    quotes: "“" "”" "‘" "’";
+    margin:0px;
+    padding:0px;
+    padding-bottom:10.5px;
+    block-size:100%;
+    min-height: 108px;
+}
+
+blockquote p::first-letter {
+    font-family:"EB Garamond Swish", serif;
+    font-feature-settings: "swsh";
+    float:left;
+    padding-right:4px;
+    margin-right:16px;
+    margin-bottom:10.5px;
+    padding-bottom:10.5px;
+    margin-top:-0.3em;
+    padding-top:32px;
+    font-size:96px;
+    font-style:bold;
+    font-weight:900;
+    text-indent:0;
+    color:#3481A4;
+    line-height:0.8;
+}
+
+@media print {
+    blockquote p::first-letter {
+    color: #000!important;
+    }
+}
+
+blockquote {
+    border:none;
+    padding:0px;
+    margin-left:0px;
+    margin-right:0px;
+    margin-bottom:10.5px;
+    margin-top:0.4em;
+    padding-top:0.4em;
+}
+
+pre, code {
+    font-family:"Victor Mono", monospace;
+    font-size:20px;
+    line-height:1.0;
+    background-color: #eee;
+    color:#3B9EA8;
+}
+pre>code {
+    font-size: 13px;
+}
+pre {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding:0px!important;
+}
+
+@media print {
+    pre, code {
+    color: #000!important;
+    background-color:white!important;
+    }
+}
+
+em, i {
+    font-family:"EB Garamond Italic", "Garamond", serif;
+}
+
+a {
+    color:#222;
+    border-bottom:#222 solid 1px;
+}
+
+a:hover {
+    color:#3481A4;
+}
+
+a::before {
+    content: "❧";
+    font-style: normal;
+}
+
+p img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+}
+
+table {
+    font-size:20px;
+}
+.lead {
+    font-family:"Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.0312em;
+    color: #B1B7B9;
+}
+.navbar-default {
+    background-color: #343838;
+    border-bottom: 8px #EBF2F2 solid;
+}
+
+.navbar-header a {
+    font-family:"EB Garamond", "Garamond", serif;
+    font-weight:600;
+    font-variant: small-caps;
+}
+
+.navbar-header a::before {
+    content:"🙨";
+    padding-right:4px;
+}
+.bs-sidenav {
+    font-family:"EB Garamond", "Garamond", serif;
+    font-size: 12px;
+    font-style:bold;
+}
+
+.bs-sidenav a {
+    border:none;
+}
+
+.bs-sidenav a::before {
+    content:"⁍";
+}
+
+.admonition-title {
+    font-family:"EB Garamond Italic", "Garamond", serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:24px;
+}
+
+.admonition-title::before {
+    content:"✒︎";
+    padding-right:4px;
+    font-style:normal;
+}
+
+.admonition.note {
+    font-weight:500;
+    color:#3481A4;
+    border-image: linear-gradient(to bottom, #3481A4, #43BBAD) 1;
+}
+
+.admonition.warning {
+    font-weight:500;
+    color:#D6446B;
+    border-image: linear-gradient(to bottom, #D6446B, #FDDC9E) 1;
+}
+
+.admonition.danger {
+    font-weight:500;
+    color:#B53679;
+    border-image: linear-gradient(to bottom, #52127C, #B53679) 1;
+}
+
+@media print {
+    .admonition.note, .admonition.warning, .admonition.danger {
+        color: black!important;
+        border-image:none!important;
+        border-color:black!important;
+        border-left:5px solid black!important;
+    }
+}
+
+.well {
+    background-color: #FCFDFF;
+}
+.btn-default {
+    background-color:#FCFDFF;
+}
+.table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+    background-color: #FCFDFF;
+}
+#mkdocs-search-query:focus {
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+#mkdocs-search-query {
+    font-family:"Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #343838;
+    height: 45px;
+}
+footer > hr {
+    width: 35%;
+}
