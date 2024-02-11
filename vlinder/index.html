@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A theme for MkDocs in the style of an academic paper with a light touch of color.">
+    <meta name="author" content="0xabad1dea">
+    <link rel="canonical" href="https://0xabad1dea.github.io/vlinder/">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    
+    <title>Home - Vlinder Academia for MkDocs</title>
+    
+
+    <link href="css/bootstrap-custom.css" rel="stylesheet">
+    <link href="css/base.css" rel="stylesheet">
+    <link href="css/vlinder.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="css/vlinderhighlight.css">
+        
+    
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+     
+</head>
+
+<body class="homepage" >
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            
+              <a class="navbar-brand" href=".">Vlinder Academia for MkDocs</a>
+            
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li class="active">
+                        <a href=".">Home</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="secondpage/">Second Page</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fas fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li class="disabled">
+                        <a rel="prev" >
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="secondpage/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#vlinder-academia">Vlinder Academia</a></li>
+            <li class="second-level"><a href="#installation-and-use">Installation and Use</a></li>
+                
+            <li class="second-level"><a href="#language-support">Language Support</a></li>
+                
+                <li class="third-level"><a href="#greek-sample">Greek sample</a></li>
+                <li class="third-level"><a href="#ukrainian-sample">Ukrainian sample</a></li>
+                <li class="third-level"><a href="#simplified-chinese-sample">Simplified Chinese sample</a></li>
+            <li class="second-level"><a href="#more-dropcaps">More Dropcaps</a></li>
+                
+                <li class="third-level"><a href="#this-is-an-h4">This is an H4</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="vlinder-academia">Vlinder Academia</h1>
+<blockquote>
+<p>This is a demonstration of the Vlinder Academia theme for MkDocs. It was forked from <a href="https://sourcefoundry.org/cinder/">Cinder</a>, which has a more modern, sans-serif look. <em>(Vlinder</em> is Dutch for &ldquo;Butterfly.&rdquo; I could not think of anything else to name it.) The font families are <a href="http://www.georgduffner.at/ebgaramond/download.html">EB Garamond</a> and <a href="https://rubjo.github.io/victor-mono/">Victor Mono</a> under an open font licence for that classic book look. Vlinder Academia is under MIT licence and you are welcome to personalize it or adapt it to another site generator.</p>
+</blockquote>
+<p>The drop caps seen in the paragraph above are a bit of a hack; they&rsquo;re implemented on the quote markdown operator (<code>&gt; text</code>). The flourishes on headers and links are completely automatic. &ldquo;Curled quotes&rdquo; and apostrophes are only automatic when the <code>smarty</code> extension is enabled, or you may type them manually in the markdown.</p>
+<p>There are some good MkDocs themes available, but none that quite nail that &ldquo;academic paper from 1892&rdquo; look I desire. I also find that many websites (including but not limited to the themes) simply set their text size far too small. Hence, I chose a good base and started hacking away at the CSS myself.</p>
+<p>The colors were picked from the &ldquo;crest&rdquo; and &ldquo;magma&rdquo; Seaborn gradients. If you print this page (including to PDF), the accent colors will be flattened to black and white and the sidebars will be removed.</p>
+<p>The author of this theme is <a href="https://0xabad1dea.github.io/">0xabad1dea</a> (she/her, the hex is silent).</p>
+<h2 id="installation-and-use">Installation and Use</h2>
+<p>Please see the <a href="https://sourcefoundry.org/cinder/">Cinder</a> docs for the nitty-gritty of installing the theme to your MkDocs (it&rsquo;s not hard, just mentally substitute &ldquo;vlinder&rdquo; for &ldquo;cinder&rdquo;) and configuring some optional functionality that I frankly don&rsquo;t care about.</p>
+<p>Here are <em>italics</em> and here is <strong>bold</strong> and here is <code>code</code> and here is <a href="https://0xabad1dea.github.io/">a link</a>. The header at the top of the page is H1 and the one just above this is H2. Only the H1 and H2 headers are centered and colored, the others are left-aligned and black with no flourishes.</p>
+<p><img alt="Garamond Flourish" src="img/garamondflourish.png" /></p>
+<p>The above is a publisher&rsquo;s flourish that was especially designed for texts typeset in Garamond, taken from <a href="https://archive.org/details/specimenbookcata00amer/page/22/mode/2up">this public domain specimen book</a>. Images included through markdown syntax are centered and 75% of column width; use HTML markup if you need more control over how an image is displayed.</p>
+<blockquote>
+<p>&ldquo;Here is a quote that actually opens with a quotation mark.&rdquo;</p>
+</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This theme supports the &ldquo;admonition&rdquo; markdown extension for inline call-outs.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Without the extension enabled for your site, these will render poorly.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>You can include arbitrary markdown within an admonition,</p>
+<blockquote>
+<p>But the results may get a bit silly.</p>
+</blockquote>
+</div>
+<p>This shall serve both to demonstrate a basic code block and explain how to enable built-in extentions: simply add the following to your <code>mkdocs.yml</code>:</p>
+<pre><code>markdown_extensions:
+  - admonition
+  - smarty
+</code></pre>
+<p>The syntax for an admonition is as follows:</p>
+<pre><code>!!! note
+    This theme supports the &quot;admonition&quot; markdown extension for inline call-outs.
+</code></pre>
+<p>Digits have been configured to render as tabular (consistent width) even outside of code blocks. Here is an example table with different alignment per column:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">First Header</th>
+<th style="text-align: center;">Second Header</th>
+<th style="text-align: right;">Third Header</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Left</td>
+<td style="text-align: center;">Center</td>
+<td style="text-align: right;">Right</td>
+</tr>
+<tr>
+<td style="text-align: left;">000000</td>
+<td style="text-align: center;">000000</td>
+<td style="text-align: right;">000000</td>
+</tr>
+<tr>
+<td style="text-align: left;">111111</td>
+<td style="text-align: center;">111111</td>
+<td style="text-align: right;">111111</td>
+</tr>
+<tr>
+<td style="text-align: left;">Longer contents</td>
+<td style="text-align: center;">Much longer contents</td>
+<td style="text-align: right;">Very much longer contents</td>
+</tr>
+</tbody>
+</table>
+<p>Here is a snippet of NetHack source code with highlighting for C:</p>
+<pre><code class="language-c">/* Fountain of snakes! */
+static void
+dowatersnakes(void)
+{
+    register int num = rn1(5, 2);
+    struct monst *mtmp;
+
+    if (!(gm.mvitals[PM_WATER_MOCCASIN].mvflags &amp; G_GONE)) {
+        if (!Blind) {
+            pline(&quot;An endless stream of %s pours forth!&quot;,
+                  Hallucination ? makeplural(rndmonnam(NULL)) : &quot;snakes&quot;);
+        } else {
+            Soundeffect(se_snakes_hissing, 75);
+            You_hear(&quot;%s hissing!&quot;, something);
+        }
+        while (num-- &gt; 0)
+            if ((mtmp = makemon(&amp;mons[PM_WATER_MOCCASIN], u.ux, u.uy,
+                                MM_NOMSG)) != 0
+                &amp;&amp; t_at(mtmp-&gt;mx, mtmp-&gt;my))
+                (void) mintrap(mtmp, NO_TRAP_FLAGS);
+    } else {
+        Soundeffect(se_furious_bubbling, 20);
+        pline_The(&quot;fountain bubbles furiously for a moment, then calms.&quot;);
+    }
+}
+</code></pre>
+<p>If you absolutely despise the cursive, replace the references to &ldquo;Victor Mono Italic&rdquo; in the classes of <code>vlinderhighlight.css</code> with either &ldquo;Victor Mono&rdquo; or &ldquo;Victor Mono Bold.&rdquo; Lastly, here is a list:</p>
+<ul>
+<li>Todo:<ul>
+<li>learn 3000 Chinese characters</li>
+<li>finish Tears of the Kingdom</li>
+<li>write Hear the Tempest Cry</li>
+</ul>
+</li>
+<li>Done:<ul>
+<li><s>this theme</s></li>
+</ul>
+</li>
+</ul>
+<h2 id="language-support">Language Support</h2>
+<p>The fonts used in this template have complete support for extended Latin, Greek and Cyrillic, with generic system Garamond as the first fallback. Since I study Chinese, the fallback list also includes some Simplified Chinese fonts generally pre-installed on Windows, Android and Apple devices chosen to best match Garamond&rsquo;s formal appearance. You can of course change them (in <code>vlinder.css</code>) to Traditional or Japanese fonts or add fallbacks for any other language. (I am not happy with the closest match I could find for iOS&hellip;)</p>
+<h3 id="greek-sample">Greek sample</h3>
+<p>Καλώς ήλθατε στη Βικιπαίδεια, την ελεύθερη εγκυκλοπαίδεια που γράφουμε συμμετοχικά.</p>
+<pre><code>Καλώς ήλθατε στη Βικιπαίδεια, την ελεύθερη εγκυκλοπαίδεια που γράφουμε συμμετοχικά.
+</code></pre>
+<h3 id="ukrainian-sample">Ukrainian sample</h3>
+<p>Ласкаво просимо до Вікіпедії, вільної енциклопедії, яку може редагувати кожен.</p>
+<pre><code>Ласкаво просимо до Вікіпедії, вільної енциклопедії, яку може редагувати кожен.
+</code></pre>
+<h3 id="simplified-chinese-sample">Simplified Chinese sample</h3>
+<p>维基百科 海納百川，有容乃大</p>
+<h2 id="more-dropcaps">More Dropcaps</h2>
+<p>Quote paragraphs have a minimum height to keep the capital from overlapping with things, and this may cause visually weird results if you throw around a lot of short ones. They also may not work as expected if they open with a bunch of punctuation. This is an arbitrary excerpt from <a href="https://www.wattpad.com/story/343286820-glory-in-the-thunder">Glory in the Thunder</a>, which I, your theme maker 0xabad1dea, wrote:</p>
+<blockquote>
+<p>As Barsamin fiddled with the fastener of his cloak, he stared openly at Hayr. “Pardon me,” he asked, “but are you… are you a Tokharika?”</p>
+<p>Hayr took a moment to keep himself from being visibly insulted. “Well, my father was,” he said, “but my mother raised me to be a town man; I don’t even own a horse, or I’d be riding it now instead of walking all the way to Antaram.”</p>
+<p>“… Oh.” Barsamin flushed deeper. “We are also going to Antaram… I, I suppose that was completely obvious though.” He folded his arms under his cloak. “It is indeed very cold here. How can you wear only that tunic?” </p>
+</blockquote>
+<p><em>(Editor&rsquo;s note: Whether or not the previous paragraph received a drop-cap was found to be browser-dependent behavior.)</em></p>
+<blockquote>
+<p>“Doesn’t get much warmer than this,” said Hayr, one eyebrow raised.</p>
+</blockquote>
+<h4 id="this-is-an-h4">This is an H4</h4>
+<h5 id="this-is-an-h5">This is an H5</h5></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Vlinder Academia is by 0xabad1dea and may be used under the MIT licence</small><br>
+            
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "."</script>
+    
+    <script src="js/base.js"></script>
+    <script src="search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>
+
+<!--
+MkDocs version : 1.5.3
+Build Date UTC : 2023-11-02 19:03:07.487652+00:00
+-->
