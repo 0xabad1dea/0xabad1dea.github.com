@@ -98,6 +98,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../titlescreen/">Title Screen</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -122,7 +128,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="next" href="../about/">
+                        <a rel="next" href="../titlescreen/">
                             Next <i class="fas fa-arrow-right"></i>
                         </a>
                     </li>
@@ -432,7 +438,8 @@ static EWRAM_DATA u16 sTrainerId = 0;
 <li>Advance the RNG;</li>
 <li>Set the flag that <code>AgbMain()</code> waits on each loop.</li>
 </ul>
-<p>You've likely noticed that special carve-outs for link cable transmissions are scattered around randomly. VBlank also handles displaying an activity indicator for the <a href="https://bulbapedia.bulbagarden.net/wiki/Game_Boy_Advance_Wireless_Adapter">wireless adapter</a> that I, as someone who was definitely alive at the time, have no recollection about whatsoever but allegedly is a real thing that exists. Finally, they've shoehorned a timer that's only relevant to the Trainer Hill challenge into every single VBlank. </p></div>
+<p>You've likely noticed that special carve-outs for link cable transmissions are scattered around randomly. VBlank also handles displaying an activity indicator for the <a href="https://bulbapedia.bulbagarden.net/wiki/Game_Boy_Advance_Wireless_Adapter">wireless adapter</a> that I, as someone who was definitely alive at the time, have no recollection about whatsoever but allegedly is a real thing that exists. Finally, they've shoehorned a timer that's only relevant to the Trainer Hill challenge into every single VBlank. This is evidence that it was a bit of a last-minute addition and there wasn't time to rewrite chunks of the engine to accomodate a more elegant solution. (<em>Everything</em> unique to Emerald was a last-minute addition.)</p>
+<p>From here we will advance to the <a href="../titlescreen/">title screen sequence</a> which still has a lot of behind-the-scenes bookkeeping to do while finally drawing something meaningful to the display.</p></div>
         
         
     </div>

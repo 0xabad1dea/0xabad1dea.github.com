@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A book that examines and explains the source code of Emerald, one of the most popular video games ever made, based on the decompilation work of PRET.">
     <meta name="author" content="0xabad1dea">
-    <link rel="canonical" href="https://0xabad1dea.github.io/emeraldscc/about/">
+    <link rel="canonical" href="https://0xabad1dea.github.io/emeraldscc/titlescreen/">
     <link rel="shortcut icon" href="../img/favicon.ico">
 
     
-    <title>About - Emerald Source Code Commentary</title>
+    <title>Title Screen - Emerald Source Code Commentary</title>
     
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
@@ -76,7 +76,7 @@
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Chapters <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -99,8 +99,8 @@
 
                         
                             
-<li >
-    <a href="../titlescreen/">Title Screen</a>
+<li class="active">
+    <a href="./">Title Screen</a>
 </li>
 
                         
@@ -109,8 +109,8 @@
                 
                 
                 
-                    <li class="active">
-                        <a href="./">About</a>
+                    <li >
+                        <a href="../about/">About</a>
                     </li>
                 
                 
@@ -123,12 +123,12 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../titlescreen/">
+                        <a rel="prev" href="../initmain/">
                             <i class="fas fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../about/">
                             Next <i class="fas fa-arrow-right"></i>
                         </a>
                     </li>
@@ -142,19 +142,38 @@
         
         <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#about">About</a></li>
+        <li class="first-level active"><a href="#title-screen">Title Screen</a></li>
+            <li class="second-level"><a href="#init-copyright-screen">Init Copyright Screen</a></li>
+                
     </ul>
 </div></div>
         <div class="col-md-9" role="main">
 
-<h1 id="about">About</h1>
-<p>The Emerald Source Code Commentary was written by <a href="https://0xabad1dea.github.io/">0xabad1dea</a> (pronounced "a bad idea", she/her pronouns) based on the stellar decompiliation work of <a href="https://github.com/pret/pokeemerald">PRET</a>. All credit for the enormous reverse engineering process belongs to <a href="https://github.com/pret/pokeemerald/graphs/contributors">them</a> and I am only responsible for the explanatory prose.</p>
-<p>Due to ongoing improvements in matters such as variable names and file structure, the current state of the PRET repository may not be identical to the code as quoted in the Commentary. However, since it is a round-trip decompiliation (that is, it recompiles to its exact original state), the code as a whole will always be functionally identical.</p>
-<p>You may freely download and share this document. You may convert file formats or translate to another language as long as the contents are semantically preserved.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>Do Not Commit Copyright Crimes Against Any Major Japanese Corporations That Could Get My Repo Pulled</strong></p>
-</div></div>
+<h1 id="title-screen">Title Screen</h1>
+<p>Between the early setup in <code>main()</code> and the actual playable game lie the rolling meadows of the title screen. Here is where graphics and sound actually begin to reach the player's senses as the game hurriedly scrambles around trying to arrange memory behind the scene. (Nitpick: the BIOS already displayed the GBA logo and played a chime before control passed to the cartridge.)</p>
+<h2 id="init-copyright-screen">Init Copyright Screen</h2>
+<p>Earlier, we saw that <code>CB2_InitCopyrightScreenAfterBootup()</code> was installed as the first game callback. All other game logic will descend in some way from this, which will replace itself with a different callback once it's done its job. To understand how it works, we must remember that it is being called once per frame, rather than exactly once.  </p>
+<pre><code class="language-c">void CB2_InitCopyrightScreenAfterBootup(void)
+{
+    if (!SetUpCopyrightScreen())
+    {
+        SetSaveBlocksPointers(GetSaveBlocksPointersBaseOffset());
+        ResetMenuAndMonGlobals();
+        Save_ResetSaveCounters();
+        LoadGameSave(SAVE_NORMAL);
+        if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
+            Sav2_ClearSetDefault();
+        SetPokemonCryStereo(gSaveBlock2Ptr-&gt;optionsSound);
+        InitHeap(gHeap, HEAP_SIZE);
+    }
+}
+</code></pre>
+<p>It's calling a bunch of various initialization routines, and then... nothing else? That's rather confusing in the context that it's executing once per frame until another callback is installed. What's installing the next callback? The critical detail is that all these functions are inside an <code>if{}</code> that will ultimately only execute once: <code>SetUpCopyrightScreen()</code> is a function that will return <code>true</code> (meaning here "yes, keep calling me") some number of times across different frames, until it returns <code>false</code> and the initialization routines fire off. Therefore, it seems the only place that the next callback could be installed would be inside <code>SetUpCopyrightScreen()</code>. (Remember, installing a new callback won't trigger it immediately - not until the next frame.)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>How do you make sure that the amount of code you've written won't take too long to execute and be only half-finished by the next frame? Well uh... mostly you just write it, run the game and check. You can calculate a theoretical maximum number of instructions per frame from the clock speed, but there is no fixed relationship between tokens of C code and the number of instructions that they represent, and different instructions can take different numbers of clock cycles. Therefore, while at a certain point it's obviously too much, you cannot really eyeball a reasonable amount of code and say whether it will actually meet deadlines in all situations without running it. (Another thing to keep in mind is that modern compilers are very good at context-dependent optimizations - so the same line of C code may compile to 10 instructions in one function and to 3 in another!)</p>
+</div>
+<p>Mosey on over to <code>SetUpCopyrightScreen()</code> and you'll see an unusual switch structure: it is switching on <code>gMain.state</code> for values of <code>0</code>, <code>default</code>, <code>140</code> and <code>141</code>. (You may be under the impression that <code>default</code> has to come last in case statements, but this is not the 🥁 case.) In state <code>0</code>, the screen is configured; in states <code>1</code> through <code>139</code> it's advancing through frames of a simple animation; </p></div>
         
         
     </div>
