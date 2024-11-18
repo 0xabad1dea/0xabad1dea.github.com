@@ -82,7 +82,7 @@
                         
                             
 <li >
-    <a href="..">Introduction</a>
+    <a href="..">Home</a>
 </li>
 
                         
@@ -145,6 +145,10 @@
         <li class="first-level active"><a href="#title-screen">Title Screen</a></li>
             <li class="second-level"><a href="#init-copyright-screen">Init Copyright Screen</a></li>
                 
+            <li class="second-level"><a href="#accessing-the-save-file">Accessing the Save File</a></li>
+                
+            <li class="second-level"><a href="#tasks-kickoff">Tasks Kickoff</a></li>
+                
     </ul>
 </div></div>
         <div class="col-md-9" role="main">
@@ -173,7 +177,67 @@
 <p class="admonition-title">Note</p>
 <p>How do you make sure that the amount of code you've written won't take too long to execute and be only half-finished by the next frame? Well uh... mostly you just write it, run the game and check. You can calculate a theoretical maximum number of instructions per frame from the clock speed, but there is no fixed relationship between tokens of C code and the number of instructions that they represent, and different instructions can take different numbers of clock cycles. Therefore, while at a certain point it's obviously too much, you cannot really eyeball a reasonable amount of code and say whether it will actually meet deadlines in all situations without running it. (Another thing to keep in mind is that modern compilers are very good at context-dependent optimizations - so the same line of C code may compile to 10 instructions in one function and to 3 in another!)</p>
 </div>
-<p>Mosey on over to <code>SetUpCopyrightScreen()</code> and you'll see an unusual switch structure: it is switching on <code>gMain.state</code> for values of <code>0</code>, <code>default</code>, <code>140</code> and <code>141</code>. (You may be under the impression that <code>default</code> has to come last in case statements, but this is not the 🥁 case.) In state <code>0</code>, the screen is configured; in states <code>1</code> through <code>139</code> it's advancing through frames of a simple animation; </p></div>
+<p>Mosey on over to <code>SetUpCopyrightScreen()</code> and you'll see an unusual switch structure: it is switching on <code>gMain.state</code> for values of <code>0</code>, <code>default</code>, <code>140</code> and <code>141</code>. (You may be under the impression that <code>default</code> has to come last in case statements, but this is not the 🥁 case.) In state <code>0</code>, the screen is configured; in states <code>1</code> through <code>139</code> it's advancing through frames of a simple animation while attempting to perform a multiboot (loading a minigame from an external source); usually none will be found and we will install the next callback and continue loading the main game. Let's make a mental todo about looking into multiboot later (this means I don't know much about it myself and realized it was sidetracking me).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can, if you have all the right equipment, <a href="https://github.com/Wack0/gba-gen3multiboot">make your own custom multiboot rom</a> and load it into a real hardware copy of Pokemon Emerald. This would make you very cool.</p>
+</div>
+<h2 id="accessing-the-save-file">Accessing the Save File</h2>
+<p>We're back in <code>CB2_InitCopyrightScreenAfterBootup()</code> for its last iteration: the save file will now be accessed. (Later in this chapter, where it mentions that the exact number of vblanks that have happened may have varied slightly, this is where the variance can occur.) There is an interesting wrinkle to this in <code>GetSaveBlocksPointersBaseOffset()</code>. We mentioned earlier that the flash is large enough to store two copies of the save file, so that if one gets corrupted and fails to load, the other may still be recoverable. The offset of the exact starting point of the second copy is not fixed but is based on the trainer ID:</p>
+<pre><code class="language-c">// Base offset for SaveBlock2 is calculated using the trainer id
+        if (gReadWriteSector-&gt;id == SECTOR_ID_SAVEBLOCK2)
+            return sector-&gt;data[offsetof(struct SaveBlock2, playerTrainerId[0])] +
+                   sector-&gt;data[offsetof(struct SaveBlock2, playerTrainerId[1])] +
+                   sector-&gt;data[offsetof(struct SaveBlock2, playerTrainerId[2])] +
+                   sector-&gt;data[offsetof(struct SaveBlock2, playerTrainerId[3])];
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>offsetof</code> is a <a href="https://en.wikipedia.org/wiki/Offsetof">standard macro</a> that I have rarely seen in production code and so I expect many readers have also not seen it before. There is no variable named <code>playerTrainerId[]</code> in this scope, it is a member of the <code>SaveBlock2</code> struct.</p>
+</div>
+<p>If the first save file is being loaded then the offset at this stage is just 0. And then uh, a <em>random</em> additional offset is added in <code>SetSaveBlocksPointers()</code>?</p>
+<pre><code class="language-c">offset = (offset + Random()) &amp; (SAVEBLOCK_MOVE_RANGE - 4);
+// (SAVEBLOCK_MOVE_RANGE = 128)
+</code></pre>
+<p>This might be an attempt at <a href="https://en.wikipedia.org/wiki/Wear_leveling">flash wear leveling</a>, but even ignoring that <code>Random()</code> is broken on Emerald, the range seems very small (and it's already surprising that the flash is large enough to accomodate two full copies of a Pokemon save file, it would need even more room to usefully do wear leveling). I'm also not sure what the point could be of basing the starting pointer for the second save block on the player's trainer ID rather than at a fixed offset. I talked to someone else who is very familiar with Pokemon engines and the leading hypothesis is that it's to frustrate the development of GameShark codes that modify the save data by ensuring there's no one fixed pointer across cartridges.</p>
+<h2 id="tasks-kickoff">Tasks Kickoff</h2>
+<p>It's not just the next callback that was installed in <code>SetUpCopyrightScreen()</code> – there's also our first <em>task.</em> Tasks are a very simple version of the priority queue scheduler that allows an operating system to switch the CPU between different programs. The github wiki of the Emerald source code already has <a href="https://github.com/pret/pokeemerald/wiki/Overview%E2%88%B6-The-Task-System">its own explanation of tasks</a> written for people modifying the game. The shape of a task is unsurprisingly laid out in <code>task.h</code>:</p>
+<pre><code class="language-c">struct Task
+{
+    TaskFunc func;
+    bool8 isActive;
+    u8 prev;
+    u8 next;
+    u8 priority;
+    s16 data[NUM_TASK_DATA];
+};
+
+extern struct Task gTasks[];
+</code></pre>
+<p><code>NUM_TASK_DATA</code> is 16, so we have 16x2=32 bytes of local task storage meant to be indexed as shorts. In <code>task.c</code> we can see that <code>NUM_TASKS</code> is also capped at 16. There are several utility functions here for managing the priority ordering of the list, adding and removing tasks, resetting the whole list, etc; here is only one of them to give a general idea:</p>
+<pre><code class="language-c">void RunTasks(void)
+{
+    u8 taskId = FindFirstActiveTask();
+
+    if (taskId != NUM_TASKS)
+    {
+        do
+        {
+            gTasks[taskId].func(taskId);
+            taskId = gTasks[taskId].next;
+        } while (taskId != TAIL_SENTINEL);
+    }
+}
+</code></pre>
+<p>If you are meddling with anything, keep in mind that getting the task list into a corrupt state will cause the game to go sideways very, <em>very</em> fast. There is nothing protecting you from trying to execute a task that makes no sense in the current context. </p>
+<p>Our first task is <code>Task_Scene1_Load</code>, and before it does a bunch of very boring sprite sheet loading, it does two things: first, disable the vblank callback which updates the screen, so that it can take as long as it wants loading all those sprites, and second, randomly choose a gender (from a very unimaginative 2) for portraying the player character during the cutscene.</p>
+<p>"Wait," you're thinking, "random gender? It's a boy/girl. The cutscene only ever shows the boy/girl. It has always shown only the boy/girl and it always will." <em>Correct.</em> Confused? Remember our study of <code>main()</code>? <em>They forgot to seed the random number generator.</em> Nothing has happened since then that could alter the random stream in any way... with the minor detail that the exact number of vblanks that have come to pass is not necessarily fixed due to hardware timing differences between platforms, hence we may be at position x, x+1, x+2, or so in the fixed stream. This means that a given cartridge in a given console, or a given emulator, will either always roll the boy or always roll the girl. If this happens to align with your save file's gender, then you'd naturally assume that it's just pulling it from the save. But it isn't! It's supposed to be random! You can make a save with an assigned gender in Ruby/Sapphire and repeatedly reset the emulator and you will see that it's random. (If you want to check with a real Ruby/Sapphire cartridge, it needs to be one with an RTC in good working order – rare these days. If the battery is dead, then it will have the exact same problem as Emerald.) After conducting an extremely scientific survey (<a href="https://infosec.exchange/@0xabad1dea/111925253332808906">mastodon results</a>, <a href="https://cohost.org/0xabad1dea/post/4463500-edit-prelimina">cohost results</a>), it appears that "all boys" is much more common, and it is specifically nonstandard situations (flash carts, knockoff consoles, the NDS, many emulators) that are likely to bring out "all girls" or even, in a hilarious workaround to the broken RNG caused by inconsistent flash carts, a mix of boys and girls. One person reported always rolling "boy" when a savefile was present and always rolling "girl" when the savefile was empty.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Having the very first thing the game shows you be 50/50 randomized is actually an excellent way to check that the RNG seeding is working as intended even on release builds with no debug tooling. Earlier I said that the broken RNG should have been caught in testing, but conducting the above research led me to realize that the developers may have been testing on flash carts with unreliable timing, which would have masked the issue. Alternatively, they may have only glanced at the opening cutscene a few times, since not much about it changed from R/S to Emerald, and usually mashed through it.</p>
+</div>
+<p><code>LoadCompressedSpriteSheet()</code> might sound like a few thousand lines of very gnarly code - compression is notoriously complicated and it is very hard to write code that is fast <em>and</em> memory-efficient <em>and</em> actually correct. Fortunately, Nintendo foresaw that problem and put a standard decompression function right in the BIOS, so the decompression is really just a light wrapper around making a system call. (Here is an <a href="https://github.com/Cult-of-GBA/BIOS/blob/master/bios_calls/decompression/lz77.s">open source reimplementation</a> of the system call itself.) It assumes the data is in <a href="https://en.wikipedia.org/wiki/LZ77_and_LZ78">LZ77</a> format. Since there is no filesystem, the spritesheets are just fixed pointers to incbin'd blobs. <code>CompressedSpriteSheet</code> is a struct that bundles such a pointer with a length and a tag. A tag is an unsigned short constant that serves as the sprite sheet's name in various functions such as finding it in the array of currently loaded sprites and finding its palette. The numbers are handed out haphazardly, have arbitrary overlap, and are defined local to their usage rather than in a big central list, so, uh, good luck if you need to allocate a new one that doesn't collide with anything.</p>
+<p>You've reached the end of what's currently been written, and we haven't even gotten to the first second of gameplay yet 🙂 But hopefully you've still learned something new!</p></div>
         
         
     </div>
